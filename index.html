@@ -231,7 +231,7 @@ footer{color:var(--texto2);font-size:12px;padding:24px 0 32px;border-top:1px sol
           <button role="menuitem" type="button" data-accion="difusiones">Crear o archivar difusiones</button>
           <hr>
           <button role="menuitem" type="button" data-accion="csv">Descargar los visibles (CSV)</button>
-          <a role="menuitem" href="rapido/" target="_blank" rel="noopener">Abrir la vista rápida (solo copiar)</a>
+          <a role="menuitem" href="vista/" target="_blank" rel="noopener">Abrir la vista para copiar</a>
           <a role="menuitem" id="mPlanilla" href="#" target="_blank" rel="noopener">Abrir la planilla</a>
           <button role="menuitem" type="button" data-accion="actualizar">Actualizar desde la planilla</button>
         </div>
@@ -379,6 +379,13 @@ const ICON = {
 };
 
 /* ---------- estado ---------- */
+/* Orden alfabético en todo el sitio (sin distinguir mayúsculas ni tildes). */
+const alfa = (a, b) => String(a || '').localeCompare(String(b || ''), 'es', { sensitivity: 'base', numeric: true });
+function ordenarListas() {
+  S.categorias.sort(alfa);
+  S.difusiones.sort((a, b) => alfa(a.nombre, b.nombre));
+}
+
 const S = {
   contactos: [], categorias: [], difusiones: [], planilla: CONFIG.PLANILLA,
   dif: '', cat: '', q: '', arroba: LS.get('arroba', true),
@@ -413,6 +420,7 @@ function aplicarDatos(d) {
   S.contactos = (d.contactos || []).map(preparar);
   S.categorias = d.categorias || [];
   S.difusiones = d.difusiones || [];
+  ordenarListas();
   if (d.planilla) S.planilla = CONFIG.PLANILLA || d.planilla;
 }
 
@@ -448,9 +456,7 @@ function visibles() {
   return S.contactos.filter(c => enDifusion(c) && (!S.cat || c['Categoría'] === S.cat) && (!p.length || coincide(c, p)) && (!rep || rep.has(c.ID)));
 }
 function ordenar(arr) {
-  const q = norm(S.q);
-  const peso = c => !q ? 0 : c._n.startsWith(q) ? 0 : c._n.includes(q) ? 1 : 2;
-  return arr.sort((a, b) => peso(a) - peso(b) || a._n.localeCompare(b._n, 'es'));
+  return arr.sort((a, b) => alfa(a.Nombre, b.Nombre));
 }
 
 /** Detecta repetidos que hayan entrado editando la planilla a mano. */
@@ -487,7 +493,7 @@ function render() {
   const base = enDif.filter(c => !p.length || coincide(c, p));
   const cuenta = {};
   base.forEach(c => { cuenta[c['Categoría']] = (cuenta[c['Categoría']] || 0) + 1; });
-  const orden = S.categorias.concat(Object.keys(cuenta).filter(k => !S.categorias.includes(k)));
+  const orden = S.categorias.concat(Object.keys(cuenta).filter(k => !S.categorias.includes(k))).sort(alfa);
   if (S.cat && !cuenta[S.cat] && !p.length) S.cat = '';
   $('#cats').innerHTML = `<button class="cat" type="button" data-cat="" aria-pressed="${!S.cat}">Todas<span>${base.length}</span></button>` +
     orden.filter(k => cuenta[k] || k === S.cat).map(k => `<button class="cat" type="button" data-cat="${esc(k)}" aria-pressed="${S.cat === k}">${esc(k)}<span>${cuenta[k] || 0}</span></button>`).join('');
@@ -641,7 +647,7 @@ document.querySelectorAll('dialog').forEach(d => {
 /* ---------- alta / edición ---------- */
 let editando = null;
 function opcionesCategorias(sel, valor, conNueva) {
-  const cats = S.categorias.length ? S.categorias : [...new Set(S.contactos.map(c => c['Categoría']))];
+  const cats = (S.categorias.length ? S.categorias.slice() : [...new Set(S.contactos.map(c => c['Categoría']))]).sort(alfa);
   sel.innerHTML = '<option value="">Elegí una categoría</option>' + cats.map(c => `<option${c === valor ? ' selected' : ''}>${esc(c)}</option>`).join('') + (conNueva ? '<option value="__nueva">+ Categoría nueva…</option>' : '');
 }
 function abrirContacto(c, prellenar) {
@@ -728,7 +734,7 @@ $('#fContacto').addEventListener('submit', async e => {
     const nuevo = preparar(r.contacto);
     const i = S.contactos.findIndex(c => c.ID === nuevo.ID);
     if (i >= 0) S.contactos[i] = nuevo; else S.contactos.push(nuevo);
-    if (!S.categorias.includes(nuevo['Categoría'])) S.categorias.push(nuevo['Categoría']);
+    if (!S.categorias.includes(nuevo['Categoría'])) { S.categorias.push(nuevo['Categoría']); ordenarListas(); }
     guardarCache(); $('#dContacto').close(); render();
     toast(i >= 0 ? 'Cambios guardados' : 'Contacto agregado');
   } catch (ex) { if (ex.message !== 'cancelado') mal(ex.message + ' Probá de nuevo en unos segundos.'); }
@@ -875,7 +881,7 @@ $('#fSumar').addEventListener('submit', async e => {
       const l = c._difs.filter(x => x !== dif); if (!quitar) l.push(dif);
       c.Difusiones = l.join(', '); preparar(c);
     });
-    if (!S.difusiones.some(d => d.nombre === dif)) S.difusiones.push({ nombre: dif, estado: 'Activa' });
+    if (!S.difusiones.some(d => d.nombre === dif)) { S.difusiones.push({ nombre: dif, estado: 'Activa' }); ordenarListas(); }
     guardarCache(); $('#dSumar').close();
     if (!quitar) { S.dif = dif; S.cat = ''; S.q = ''; $('#q').value = ''; sincronizarURL(); }
     render(); toast(quitar ? `${r.cambios} contactos quitados` : `${r.cambios} contactos sumados a ${dif}`);
@@ -900,7 +906,7 @@ async function guardarDifusion(d) {
     if (!r.ok) throw new Error(r.mensaje);
     if (d.anterior && d.anterior !== d.nombre) S.contactos.forEach(c => { if (c._difs.includes(d.anterior)) { c.Difusiones = c._difs.map(x => x === d.anterior ? d.nombre : x).join(', '); preparar(c); } });
     if (S.dif === d.anterior) S.dif = d.nombre;
-    S.difusiones = r.difusiones; guardarCache(); render(); abrirDifusiones(); toast('Difusión guardada');
+    S.difusiones = r.difusiones; ordenarListas(); guardarCache(); render(); abrirDifusiones(); toast('Difusión guardada');
   } catch (ex) { if (ex.message !== 'cancelado') { $('#ddErr').textContent = ex.message; $('#ddErr').hidden = false; } }
 }
 $('#ddLista').addEventListener('click', e => {
