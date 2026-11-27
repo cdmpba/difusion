@@ -163,6 +163,8 @@ const mailsDe = s => String(s || '').toLowerCase().split(/[\s,;/]+/).map(x => x.
 const igsDe = s => String(s || '').split(/[\s,;]+/).map(p => { const m = p.match(/instagram\.com\/([A-Za-z0-9._]+)/); return (m ? m[1] : p).replace(/^@/, '').replace(/\/+$/, '').toLowerCase(); }).filter(h => /^[a-z0-9._]{2,30}$/.test(h));
 
 const LIMITE_IG = 20;
+/* Orden alfabético en todo el sitio (sin distinguir mayúsculas ni tildes). */
+const alfa = (a, b) => String(a || '').localeCompare(String(b || ''), 'es', { sensitivity: 'base', numeric: true });
 const S = { contactos: [], difusiones: [], categorias: [], modo: LS.get('modo', 'ig'), grupo: null, q: '', copiadas: new Set(LS.get('copiadas', [])), sel: [], verTanda: {} };
 
 /* ---------- datos ---------- */
@@ -175,7 +177,8 @@ function preparar(c) {
 function aplicar(d) {
   S.contactos = (d.contactos || []).map(preparar);
   S.difusiones = (d.difusiones || []).filter(x => x.estado !== 'Archivada').map(x => x.nombre);
-  S.categorias = d.categorias || [];
+  S.categorias = (d.categorias || []).slice().sort(alfa);
+  S.difusiones.sort(alfa);
 }
 async function cargar() {
   const cache = LS.get('cache', null);
@@ -194,7 +197,7 @@ async function cargar() {
 function grupos(campo) {
   const out = [];
   S.difusiones.forEach(n => out.push({ id: 'd:' + n, nombre: n, dif: true, lista: S.contactos.filter(c => c._difs.includes(n)) }));
-  const cats = S.categorias.concat([...new Set(S.contactos.map(c => c['Categoría']))].filter(k => !S.categorias.includes(k)));
+  const cats = S.categorias.concat([...new Set(S.contactos.map(c => c['Categoría']))].filter(k => !S.categorias.includes(k))).sort(alfa);
   cats.forEach(n => out.push({ id: 'c:' + n, nombre: n, lista: S.contactos.filter(c => c['Categoría'] === n) }));
   out.push({ id: 'todos', nombre: 'Todos', lista: S.contactos });
   return out.map(g => Object.assign(g, { n: unicos(g.lista, campo).length })).filter(g => g.n);
@@ -202,8 +205,7 @@ function grupos(campo) {
 function unicos(lista, campo) { return [...new Set(lista.flatMap(c => c[campo]))]; }
 const plural = (n, uno, varios) => n === 1 ? '1 ' + uno : n + ' ' + varios;
 /* Orden fijo: el de la pestaña Categorías de la planilla; después, alfabético. */
-function idxCat(cat) { const i = S.categorias.indexOf(cat); return i < 0 ? 999 : i; }
-function porCategoria(a, b) { return idxCat(a['Categoría']) - idxCat(b['Categoría']) || String(a['Categoría']).localeCompare(b['Categoría'], 'es') || a.Nombre.localeCompare(b.Nombre, 'es'); }
+function porCategoria(a, b) { return alfa(a['Categoría'], b['Categoría']) || alfa(a.Nombre, b.Nombre); }
 /* Botones de grupos: proyectos (naranja) arriba, categorías (azul) abajo. */
 function gridGrupos(campo, uno, varios) {
   const gs = grupos(campo), pr = gs.filter(g => g.dif), ca = gs.filter(g => !g.dif);
@@ -215,7 +217,7 @@ function gridGrupos(campo, uno, varios) {
 function cabecera(g, campo, uno, varios) {
   const cuenta = {};
   g.lista.forEach(c => { const n = c[campo].length; if (n) cuenta[c['Categoría']] = (cuenta[c['Categoría']] || 0) + n; });
-  const cats = Object.keys(cuenta).sort((a, b) => idxCat(a) - idxCat(b));
+  const cats = Object.keys(cuenta).sort(alfa);
   return `<div class="volver${g.dif ? ' p' : ''}"><button type="button" data-volver>← Volver</button><span><span class="etq ${g.dif ? 'p' : 'c'}">${g.dif ? 'Proyecto' : 'Categoría'}</span><br><b>${esc(g.nombre)}</b></span></div>`
     + (cats.length > 1 ? `<div class="resumen" role="group" aria-label="Filtrar por categoría"><button type="button" data-subcat="" aria-pressed="${!S.subcat}">Todas <b>${Object.values(cuenta).reduce((a, b) => a + b, 0)}</b></button>${cats.map(k => `<button type="button" data-subcat="${esc(k)}" aria-pressed="${S.subcat === k}">${esc(k)} <b>${cuenta[k]}</b></button>`).join('')}</div>` : '');
 }
