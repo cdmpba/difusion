@@ -37,7 +37,21 @@ h2{font-size:15px;color:var(--texto2);font-weight:500;margin:20px 4px 10px}
 @media(max-width:480px){.grupos{grid-template-columns:1fr}}
 .grupo{min-height:64px;border:1px solid var(--borde);background:#fff;border-radius:14px;cursor:pointer;text-align:left;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:17px;font-weight:700;color:var(--azul)}
 .grupo span{font-weight:400;color:var(--texto2);font-size:15px;white-space:nowrap}
-.grupo.dif{border-color:var(--acento);background:#EEF8FD}
+.grupo.dif{border:2px solid #E8963A;background:#FFF4E5;color:#7A4300}
+.grupo.dif span{color:#9A5A12}
+.etq{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:2px 8px;margin-bottom:2px}
+.etq.p{background:#E8963A;color:#fff}
+.etq.c{background:#DCEBF6;color:var(--azul)}
+.grupo .nom{display:block;font-weight:700;color:inherit;font-size:17px;white-space:normal}
+h2.sec{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;margin:22px 4px 10px}
+h2.sec.p{color:#9A5A12}
+h2.sec.c{color:var(--azul)}
+.sub{font-size:14px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin:18px 4px 8px;display:flex;justify-content:space-between}
+.sub span{font-weight:400;color:var(--texto2);text-transform:none;letter-spacing:0}
+.resumen{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.resumen span{font-size:13px;background:#fff;border:1px solid var(--borde);border-radius:999px;padding:4px 10px;color:var(--texto)}
+.resumen b{color:var(--azul)}
+.volver.p b{color:#7A4300}
 
 .volver{display:flex;align-items:center;gap:10px;margin:18px 0 10px}
 .volver button{min-height:48px;border:1px solid var(--borde);background:#fff;border-radius:12px;padding:0 16px;cursor:pointer;font-weight:500;color:var(--azul)}
@@ -72,6 +86,45 @@ h2{font-size:15px;color:var(--texto2);font-weight:500;margin:20px 4px 10px}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .toast.err{background:#A03434}
 footer{font-size:13px;color:var(--texto2);text-align:center;padding:30px 0}
+
+/* Selección de cuentas */
+.marca{flex:0 0 60px;border:0;border-right:1px solid var(--borde);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.marca i{width:26px;height:26px;border:2px solid #9FB0BF;border-radius:7px;display:flex;align-items:center;justify-content:center;font-style:normal;color:#fff;font-size:17px;font-weight:700;background:#fff}
+.fila.sel{border-color:var(--acento);box-shadow:0 0 0 2px rgba(41,168,224,.35)}
+.fila.sel .marca i{background:var(--acento);border-color:var(--acento)}
+.herr{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.herr button{min-height:48px;border:1px solid var(--azul);background:#fff;color:var(--azul);border-radius:12px;padding:0 16px;font-weight:700;cursor:pointer}
+.herr .sutil{border-color:var(--borde);color:var(--texto2);font-weight:500}
+.ayuda{font-size:14px;color:var(--texto2);margin:0 4px 10px}
+.pie{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--borde);box-shadow:0 -6px 20px rgba(25,59,87,.12);padding:12px 16px calc(12px + env(safe-area-inset-bottom));z-index:9}
+.pie .wrap{display:flex;gap:10px;align-items:center;padding:0}
+.pie .grande{min-height:64px;font-size:19px}
+.pie .cuenta{flex:0 0 auto;font-size:15px;color:var(--texto2);text-align:center;line-height:1.2}
+.pie .cuenta b{display:block;font-size:22px;color:var(--azul)}
+body.con-pie main{padding-bottom:110px}
+body.con-pie .toast{bottom:112px}
+/* Mails de la tanda */
+.tanda.actual{outline:3px solid #E8963A;outline-offset:1px;font-weight:700}
+.lista-mails{list-style:none;margin:10px 0 0;padding:0 12px 6px;background:var(--fondo);border:1px solid var(--borde);border-radius:10px;font-size:14px;max-height:300px;overflow-y:auto;scroll-behavior:smooth}
+.lista-mails .th{position:sticky;top:0;background:var(--fondo);font-weight:700;color:var(--azul);padding:10px 0 6px;border-bottom:2px solid var(--borde);display:flex;justify-content:space-between;gap:8px;z-index:1}
+.lista-mails .th span{font-weight:500;font-size:13px}
+.lista-mails .th.ok{color:var(--ok)}
+.lista-mails .th.ahora{color:#7A4300}
+.lista-mails li.ok .m{color:var(--texto2);text-decoration:line-through}
+.lista-mails li.ahora{background:#FFF4E5;margin:0 -12px;padding:6px 12px}
+.lista-mails li{padding:6px 0;border-bottom:1px solid var(--borde);min-width:0}
+.lista-mails li:last-child{border-bottom:0}
+.lista-mails .m{display:block;color:var(--texto);word-break:break-all;font-weight:500}
+.lista-mails .q{display:block;color:var(--texto2);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:520px){
+  .copiar{padding:10px 12px}
+  .copiar .u{font-size:17px}
+  .copiar .acc{display:none}
+  .fila.ok .copiar .acc{display:block;padding:6px 10px;font-size:14px}
+  .marca{flex-basis:52px}
+  .ver{padding:0 10px;font-size:13px}
+}
+.lista-tit{font-size:14px;color:var(--texto2);margin:16px 0 0}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -89,6 +142,7 @@ footer{font-size:13px;color:var(--texto2);text-align:center;padding:30px 0}
   <div id="vista"><p class="cargando">Cargando…</p></div>
   <footer>Comunicación Digital · MPBA</footer>
 </main>
+<div class="pie" id="pie" hidden><div class="wrap"><div class="cuenta"><b id="pieN">0</b>de 20</div><button class="grande" type="button" id="pieCopiar">Copiar seleccionadas</button></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -99,13 +153,14 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9@._]+/g, ' ').trim();
 const LS = {
-  get(k, d) { try { const v = localStorage.getItem('rapido.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem('rapido.' + k, JSON.stringify(v)); } catch (e) {} }
+  get(k, d) { try { const v = localStorage.getItem('vista.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('vista.' + k, JSON.stringify(v)); } catch (e) {} }
 };
 const mailsDe = s => String(s || '').toLowerCase().split(/[\s,;/]+/).map(x => x.replace(/^\.+|\.+$/g, '')).filter(x => /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/.test(x));
 const igsDe = s => String(s || '').split(/[\s,;]+/).map(p => { const m = p.match(/instagram\.com\/([A-Za-z0-9._]+)/); return (m ? m[1] : p).replace(/^@/, '').replace(/\/+$/, '').toLowerCase(); }).filter(h => /^[a-z0-9._]{2,30}$/.test(h));
 
-const S = { contactos: [], difusiones: [], categorias: [], modo: LS.get('modo', 'ig'), grupo: null, q: '', copiadas: new Set(LS.get('copiadas', [])) };
+const LIMITE_IG = 20;
+const S = { contactos: [], difusiones: [], categorias: [], modo: LS.get('modo', 'ig'), grupo: null, q: '', copiadas: new Set(LS.get('copiadas', [])), sel: [], verTanda: {} };
 
 /* ---------- datos ---------- */
 function preparar(c) {
@@ -142,60 +197,131 @@ function grupos(campo) {
   return out.map(g => Object.assign(g, { n: unicos(g.lista, campo).length })).filter(g => g.n);
 }
 function unicos(lista, campo) { return [...new Set(lista.flatMap(c => c[campo]))]; }
+const plural = (n, uno, varios) => n === 1 ? '1 ' + uno : n + ' ' + varios;
+/* Orden fijo: el de la pestaña Categorías de la planilla; después, alfabético. */
+function idxCat(cat) { const i = S.categorias.indexOf(cat); return i < 0 ? 999 : i; }
+function porCategoria(a, b) { return idxCat(a['Categoría']) - idxCat(b['Categoría']) || String(a['Categoría']).localeCompare(b['Categoría'], 'es') || a.Nombre.localeCompare(b.Nombre, 'es'); }
+/* Botones de grupos: proyectos (naranja) arriba, categorías (azul) abajo. */
+function gridGrupos(campo, uno, varios) {
+  const gs = grupos(campo), pr = gs.filter(g => g.dif), ca = gs.filter(g => !g.dif);
+  const boton = x => `<button class="grupo${x.dif ? ' dif' : ''}" type="button" data-grupo="${esc(x.id)}"><span class="nom">${esc(x.nombre)}</span><span>${plural(x.n, uno, varios)}</span></button>`;
+  return (pr.length ? `<h2 class="sec p"><span class="etq p">Proyectos</span>Congresos, concursos y difusiones</h2><div class="grupos">${pr.map(boton).join('')}</div>` : '')
+    + `<h2 class="sec c"><span class="etq c">Categorías</span>Por tipo de contacto</h2><div class="grupos">${ca.map(boton).join('')}</div>`;
+}
+/* Cabecera de un grupo abierto, con su color y el desglose por categoría. */
+function cabecera(g, campo, uno, varios) {
+  const cuenta = {};
+  g.lista.forEach(c => { const n = c[campo].length; if (n) cuenta[c['Categoría']] = (cuenta[c['Categoría']] || 0) + n; });
+  const cats = Object.keys(cuenta).sort((a, b) => idxCat(a) - idxCat(b));
+  return `<div class="volver${g.dif ? ' p' : ''}"><button type="button" data-volver>← Volver</button><span><span class="etq ${g.dif ? 'p' : 'c'}">${g.dif ? 'Proyecto' : 'Categoría'}</span><br><b>${esc(g.nombre)}</b></span></div>`
+    + (cats.length > 1 ? `<div class="resumen">${cats.map(k => `<span>${esc(k)} <b>${cuenta[k]}</b></span>`).join('')}</div>` : '');
+}
 
 /* ---------- vistas ---------- */
 function render() {
   document.querySelectorAll('.modo').forEach(b => b.setAttribute('aria-pressed', b.dataset.modo === S.modo));
   S.modo === 'ig' ? vistaIG() : vistaMails();
+  pie();
+}
+
+/* Lista de cuentas visible ahora (búsqueda o grupo), en orden, sin repetir. */
+function cuentasVisibles() {
+  const q = norm(S.q).replace(/^@/, '');
+  let lista = [];
+  if (q) { const pal = q.split(/\s+/); lista = S.contactos.filter(c => c._igs.length && pal.every(p => c._busq.includes(p))); }
+  else if (S.grupo) { const g = grupos('_igs').find(x => x.id === S.grupo); lista = g ? g.lista.filter(c => c._igs.length) : []; }
+  const vistos = new Set(), out = [];
+  lista.slice().sort(porCategoria).forEach(c => c._igs.forEach(h => { if (!vistos.has(h)) { vistos.add(h); out.push({ h, c }); } }));
+  return out;
 }
 
 function vistaIG() {
   const g = S.grupo && grupos('_igs').find(x => x.id === S.grupo);
   let html = `<div class="buscar"><input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Escribí un nombre o @usuario" aria-label="Buscar cuenta de Instagram" value="${esc(S.q)}"></div>`;
-  const q = norm(S.q).replace(/^@/, '');
-  if (q) {
-    const pal = q.split(/\s+/);
-    const res = S.contactos.filter(c => c._igs.length && pal.every(p => c._busq.includes(p)));
-    html += res.length ? '<h2>Tocá la cuenta para copiarla</h2>' + filas(res) : `<p class="vacio">No hay cuentas con “${esc(S.q)}”.</p>`;
-  } else if (g) {
-    html += `<div class="volver"><button type="button" data-volver>← Volver</button><b>${esc(g.nombre)}</b></div>` + filas(g.lista.filter(c => c._igs.length));
+  const cuentas = cuentasVisibles();
+  if (S.q.trim() || g) {
+    if (!S.q.trim()) html += cabecera(g, '_igs', 'cuenta', 'cuentas');
+    else html += '<div style="height:14px"></div>';
+    if (!cuentas.length) html += `<p class="vacio">No hay cuentas con “${esc(S.q)}”.</p>`;
+    else {
+      const pendientes = cuentas.filter(x => !S.copiadas.has(x.h) && !S.sel.includes(x.h)).length;
+      html += `<p class="ayuda">Tocá una cuenta para copiarla sola, o marcá el cuadrado de varias para copiarlas juntas (hasta ${LIMITE_IG}).</p>
+        <div class="herr">${pendientes && S.sel.length < LIMITE_IG ? `<button type="button" data-auto>${S.sel.length ? 'Marcar ' + Math.min(LIMITE_IG - S.sel.length, pendientes) + ' más' : 'Marcar las próximas ' + Math.min(LIMITE_IG, pendientes)}</button>` : ''}
+        ${S.sel.length ? '<button class="sutil" type="button" data-limpiar>Desmarcar todas</button>' : ''}</div>` + conSubtitulos(cuentas);
+    }
   } else {
-    html += '<h2>O elegí un grupo</h2><div class="grupos">' + grupos('_igs').map(x => `<button class="grupo${x.dif ? ' dif' : ''}" type="button" data-grupo="${esc(x.id)}">${esc(x.nombre)}<span>${x.n === 1 ? '1 cuenta' : x.n + ' cuentas'}</span></button>`).join('') + '</div>';
+    html += gridGrupos('_igs', 'cuenta', 'cuentas');
   }
   pintar(html, true);
 }
 
-function filas(lista) {
-  return lista.slice().sort((a, b) => a.Nombre.localeCompare(b.Nombre, 'es')).flatMap(c => c._igs.map(h => {
-    const ok = S.copiadas.has(h);
-    return `<div class="fila${ok ? ' ok' : ''}"><button class="copiar" type="button" data-ig="${esc(h)}" aria-label="Copiar @${esc(h)}">
+function fila({ h, c }) {
+  const ok = S.copiadas.has(h), sel = S.sel.includes(h);
+  return `<div class="fila${ok ? ' ok' : ''}${sel ? ' sel' : ''}">
+    <button class="marca" type="button" data-marcar="${esc(h)}" aria-pressed="${sel}" aria-label="${sel ? 'Desmarcar' : 'Marcar'} @${esc(h)}"><i>${sel ? '✓' : ''}</i></button>
+    <button class="copiar" type="button" data-ig="${esc(h)}" aria-label="Copiar @${esc(h)}">
       <span class="txt"><span class="u">@${esc(h)}</span><span class="n">${esc(c.Nombre)}</span></span><span class="acc">${ok ? '✓ Copiado' : 'Copiar'}</span></button>
-      <a class="ver" href="https://www.instagram.com/${esc(h)}/" target="_blank" rel="noopener" aria-label="Ver el perfil de @${esc(h)}">Ver perfil</a></div>`;
-  })).join('');
+    <a class="ver" href="https://www.instagram.com/${esc(h)}/" target="_blank" rel="noopener" aria-label="Ver el perfil de @${esc(h)}">Ver<br>perfil</a></div>`;
+}
+
+/* Si la lista mezcla categorías (proyecto, búsqueda, Todos), separa con un subtítulo por categoría. */
+function conSubtitulos(cuentas) {
+  const cats = [...new Set(cuentas.map(x => x.c['Categoría']))];
+  if (cats.length < 2) return cuentas.map(fila).join('');
+  const n = {}; cuentas.forEach(x => n[x.c['Categoría']] = (n[x.c['Categoría']] || 0) + 1);
+  let html = '', ant = null;
+  cuentas.forEach(x => {
+    const k = x.c['Categoría'];
+    if (k !== ant) { html += `<h3 class="sub">${esc(k)}<span>${plural(n[k], 'cuenta', 'cuentas')}</span></h3>`; ant = k; }
+    html += fila(x);
+  });
+  return html;
+}
+
+function pie() {
+  const on = S.modo === 'ig' && S.sel.length > 0;
+  $('#pie').hidden = !on; document.body.classList.toggle('con-pie', on);
+  if (on) { $('#pieN').textContent = S.sel.length; $('#pieCopiar').textContent = 'Copiar ' + plural(S.sel.length, 'marcada', 'marcadas'); }
 }
 
 function vistaMails() {
   const g = S.grupo && grupos('_mails').find(x => x.id === S.grupo);
-  if (!g) {
-    pintar('<h2>¿A quién le escribís?</h2><div class="grupos">' + grupos('_mails').map(x => `<button class="grupo${x.dif ? ' dif' : ''}" type="button" data-grupo="${esc(x.id)}">${esc(x.nombre)}<span>${x.n === 1 ? '1 mail' : x.n + ' mails'}</span></button>`).join('') + '</div>');
-    return;
-  }
-  const mails = unicos(g.lista, '_mails');
+  if (!g) { pintar(gridGrupos('_mails', 'mail', 'mails')); return; }
+  // Mails sin repetir, ordenados por categoría (así cada tanda queda agrupada)
+  const quien = {};
+  g.lista.slice().sort(porCategoria).forEach(c => c._mails.forEach(m => { if (!quien[m]) quien[m] = c; }));
+  const mails = Object.keys(quien);
   const total = Math.ceil(mails.length / POR_TANDA);
-  const hechas = LS.get('tandas.' + g.id, []);
-  const sig = [...Array(total).keys()].find(i => !hechas.includes(i));
+  const tandas = [...Array(total).keys()].map(i => mails.slice(i * POR_TANDA, (i + 1) * POR_TANDA));
+  const cop = new Set(LS.get('mails.' + g.id, []));
+  const hecha = i => tandas[i].every(m => cop.has(m));
+  const hechas = tandas.filter((_, i) => hecha(i)).length;
+  const sig = tandas.findIndex((_, i) => !hecha(i));
+  let ver = S.verTanda[g.id];
+  if (ver === undefined || ver >= total) ver = sig < 0 ? 0 : sig;
   const rango = i => (i * POR_TANDA + 1) + ' a ' + Math.min((i + 1) * POR_TANDA, mails.length);
-  pintar(`<div class="volver"><button type="button" data-volver>← Volver</button><b>${esc(g.nombre)}</b></div>
+  const yaCopiada = hecha(ver);
+  const lista = tandas.map((t, i) => {
+    const ok = hecha(i), ahora = i === ver;
+    return `<li class="th${ok ? ' ok' : ''}${ahora ? ' ahora' : ''}" data-th="${i}">Tanda ${i + 1} · ${rango(i).replace(' a ', '–')}<span>${ok ? '✓ Copiada' : ahora ? '← Esta' : 'Pendiente'}</span></li>`
+      + t.map(m => `<li class="${cop.has(m) ? 'ok' : ''}${ahora ? ' ahora' : ''}"><span class="m">${esc(m)}</span><span class="q">${esc(quien[m].Nombre)} · ${esc(quien[m]['Categoría'])}</span></li>`).join('');
+  }).join('');
+  pintar(cabecera(g, '_mails', 'mail', 'mails') + `
     <div class="tarjeta">
-      ${sig === undefined
-        ? `<button class="grande fin" type="button" disabled>✓ Copiaste los ${mails.length} mails</button>`
-        : `<button class="grande" type="button" data-tanda="${sig}">Copiar mails ${rango(sig)}</button>`}
-      <p class="estado">Copiaste <b>${hechas.length} de ${total}</b> tandas de ${POR_TANDA}. Pegalos en CCO.</p>
-      <div class="barra"><i style="width:${total ? hechas.length / total * 100 : 0}%"></i></div>
-      <div class="tandas">${[...Array(total).keys()].map(i => `<button class="tanda${hechas.includes(i) ? ' ok' : ''}" type="button" data-tanda="${i}" aria-label="Copiar mails ${rango(i)}">${hechas.includes(i) ? '✓ ' : ''}${rango(i).replace(' a ', '–')}</button>`).join('')}</div>
-      ${hechas.length ? '<button class="chico" type="button" data-reiniciar>Empezar de nuevo</button>' : ''}
+      ${sig < 0 ? `<p class="estado" style="margin-top:0"><b>✓ Ya copiaste los ${mails.length} mails.</b></p>` : ''}
+      <button class="grande${yaCopiada ? ' fin' : ''}" type="button" data-copiar-tanda="${ver}">${yaCopiada ? 'Copiar de nuevo ' : 'Copiar mails '}${rango(ver)}</button>
+      <p class="estado">Copiaste <b>${hechas} de ${total}</b> tandas de ${POR_TANDA}. Pegalos en CCO.</p>
+      <div class="barra"><i style="width:${total ? hechas / total * 100 : 0}%"></i></div>
+      <p class="lista-tit">Todos los mails, por tanda. Tachados: ya copiados. En naranja: la tanda del botón.</p>
+      <ul class="lista-mails" id="listaMails">${lista}</ul>
+      <p class="lista-tit">Elegí otra tanda:</p>
+      <div class="tandas">${tandas.map((_, i) => `<button class="tanda${hecha(i) ? ' ok' : ''}${i === ver ? ' actual' : ''}" type="button" data-ver-tanda="${i}" aria-pressed="${i === ver}">${hecha(i) ? '✓ ' : ''}${rango(i).replace(' a ', '–')}</button>`).join('')}</div>
+      ${cop.size ? '<button class="chico" type="button" data-reiniciar>Empezar de nuevo</button>' : ''}
     </div>`);
-  S._mails = mails; S._gid = g.id;
+  // La lista deslizable se ubica sola en la tanda del botón
+  const box = $('#listaMails'), th = box && box.querySelector(`[data-th="${ver}"]`);
+  if (th) box.scrollTop = th.offsetTop - box.offsetTop;
+  S._tandas = tandas; S._gid = g.id;
 }
 
 function pintar(html, conBusqueda) {
@@ -215,7 +341,8 @@ async function copiar(txt) {
   }
 }
 let tt;
-function toast(m, err) { const t = $('#toast'); t.textContent = m; t.classList.toggle('err', !!err); t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2200); }
+function toast(m, err) { const t = $('#toast'); t.textContent = m; t.classList.toggle('err', !!err); t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2400); }
+function marcarCopiadas(hs) { hs.forEach(h => S.copiadas.add(h)); LS.set('copiadas', [...S.copiadas].slice(-1000)); }
 
 document.querySelector('.modos').addEventListener('click', e => {
   const b = e.target.closest('[data-modo]'); if (!b) return;
@@ -225,26 +352,51 @@ document.querySelector('.modos').addEventListener('click', e => {
 $('#vista').addEventListener('input', e => { if (e.target.id === 'q') { S.q = e.target.value; render(); } });
 $('#vista').addEventListener('click', async e => {
   const t = e.target;
+  const mk = t.closest('[data-marcar]');
+  if (mk) {
+    const h = mk.dataset.marcar, i = S.sel.indexOf(h);
+    if (i >= 0) S.sel.splice(i, 1);
+    else if (S.sel.length >= LIMITE_IG) { toast('Ya marcaste ' + LIMITE_IG + '. Copialas primero.', true); return; }
+    else S.sel.push(h);
+    render(); return;
+  }
+  if (t.closest('[data-auto]')) {
+    cuentasVisibles().filter(x => !S.copiadas.has(x.h) && !S.sel.includes(x.h)).slice(0, LIMITE_IG - S.sel.length).forEach(x => S.sel.push(x.h));
+    render(); return;
+  }
+  if (t.closest('[data-limpiar]')) { S.sel = []; render(); return; }
   const ig = t.closest('[data-ig]');
   if (ig) {
     const h = ig.dataset.ig;
-    if (await copiar('@' + h)) { S.copiadas.add(h); LS.set('copiadas', [...S.copiadas].slice(-500)); render(); toast('@' + h + ' copiado'); }
+    if (await copiar('@' + h)) { marcarCopiadas([h]); render(); toast('@' + h + ' copiado'); }
     else toast('No se pudo copiar', true);
     return;
   }
   const gr = t.closest('[data-grupo]');
   if (gr) { S.grupo = gr.dataset.grupo; S.q = ''; render(); window.scrollTo(0, 0); return; }
   if (t.closest('[data-volver]')) { S.grupo = null; render(); return; }
-  const td = t.closest('[data-tanda]');
-  if (td) {
-    const i = +td.dataset.tanda, lote = S._mails.slice(i * POR_TANDA, (i + 1) * POR_TANDA);
+  const vt = t.closest('[data-ver-tanda]');
+  if (vt) { S.verTanda[S._gid] = +vt.dataset.verTanda; render(); return; }
+  const ct = t.closest('[data-copiar-tanda]');
+  if (ct) {
+    const i = +ct.dataset.copiarTanda, lote = S._tandas[i];
     if (!(await copiar(lote.join(', ')))) { toast('No se pudo copiar', true); return; }
-    const k = 'tandas.' + S._gid, h = LS.get(k, []);
-    if (!h.includes(i)) h.push(i);
-    LS.set(k, h); render(); toast(lote.length + ' mails copiados');
+    const k = 'mails.' + S._gid, cop = new Set(LS.get(k, []));
+    lote.forEach(m => cop.add(m));
+    LS.set(k, [...cop]);
+    const sig = S._tandas.findIndex(t => !t.every(m => cop.has(m)));
+    S.verTanda[S._gid] = sig < 0 ? i : sig;
+    render(); toast(plural(lote.length, 'mail copiado', 'mails copiados') + ' (' + (i * POR_TANDA + 1) + ' a ' + (i * POR_TANDA + lote.length) + ')');
     return;
   }
-  if (t.closest('[data-reiniciar]')) { LS.set('tandas.' + S._gid, []); render(); }
+  if (t.closest('[data-reiniciar]')) { LS.set('mails.' + S._gid, []); delete S.verTanda[S._gid]; render(); }
+});
+$('#pieCopiar').addEventListener('click', async () => {
+  const lote = S.sel.slice();
+  if (!lote.length) return;
+  if (!(await copiar(lote.map(h => '@' + h).join(' ')))) { toast('No se pudo copiar', true); return; }
+  marcarCopiadas(lote); S.sel = []; render();
+  toast(plural(lote.length, 'cuenta copiada', 'cuentas copiadas') + '. Pegalas en el posteo.');
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.q) { S.q = ''; render(); } });
 
