@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Difusión · MPBA</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔵</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --azul:#193B57; --azul2:#155C8C; --acento:#29A8E0; --texto:#243645; --texto2:#647687;
+  --fondo:#F5F7F9; --borde:#DCE4EB; --borde2:#CAD5DE; --enlace:#155C8C; --ok:#1C8053; --error:#A03434;
+  --aviso:#8A5A00; --avisoFondo:#FFF6E0; --copiado:#E3F4FB;
+  --font:"Google Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fondo);color:var(--texto);font:15px/1.5 var(--font)}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--enlace)}
+:focus-visible{outline:3px solid var(--acento);outline-offset:2px}
+[hidden]{display:none!important}
+input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+
+/* Encabezado (nivel destacado) */
+.top{background:linear-gradient(135deg,var(--azul),var(--azul2));color:#fff;border-bottom:4px solid var(--acento)}
+.top .wrap{display:flex;align-items:center;gap:16px;padding-top:14px;padding-bottom:14px}
+.top img{height:34px;width:auto;display:block}
+.top .tit{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.top .tit small{font-size:12px;opacity:.8;letter-spacing:.02em}
+.top h1{margin:0;font-size:22px;font-weight:700}
+.estado{margin-left:auto;font-size:12px;background:rgba(255,255,255,.14);border-radius:999px;padding:5px 10px;white-space:nowrap}
+.estado.err{background:#fff;color:var(--error);font-weight:500}
+
+/* Difusiones: botones grandes */
+.difs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin:16px 0 0}
+@media(max-width:600px){.difs{grid-template-columns:1fr 1fr}}
+.dif{min-height:52px;border:1px solid var(--borde);background:#fff;border-radius:12px;padding:8px 12px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:center;transition:background .15s,border-color .15s}
+.dif b{font-size:14px;font-weight:700;color:var(--azul);line-height:1.25}
+.dif span{font-size:12px;color:var(--texto2)}
+.dif[aria-pressed="true"]{background:var(--azul);border-color:var(--azul)}
+.dif[aria-pressed="true"] b,.dif[aria-pressed="true"] span{color:#fff}
+.dif:hover{border-color:var(--azul2)}
+
+/* Barra fija: buscador + categorías */
+.barra{position:sticky;top:0;z-index:20;background:var(--fondo);padding:12px 0 8px;border-bottom:1px solid transparent}
+.barra.sombra{border-bottom-color:var(--borde);box-shadow:0 2px 8px rgba(25,59,87,.06)}
+.buscar{position:relative}
+.buscar label{display:block;font-size:12px;font-weight:500;color:var(--texto2);margin:0 0 4px 2px}
+.buscar input{width:100%;height:52px;border:1px solid var(--borde2);border-radius:12px;background:#fff;padding:0 48px 0 46px;font-size:17px}
+.buscar input:focus{border-color:var(--azul2);outline:none;box-shadow:0 0 0 3px rgba(41,168,224,.3)}
+.buscar .lupa{position:absolute;left:15px;bottom:15px;width:22px;height:22px;color:var(--texto2);pointer-events:none}
+.buscar .limpiar{position:absolute;right:6px;bottom:6px;width:40px;height:40px;border:0;background:none;border-radius:8px;cursor:pointer;color:var(--texto2);font-size:22px;display:none}
+.buscar.lleno .limpiar{display:block}
+.buscar kbd{position:absolute;right:14px;bottom:15px;font:12px var(--font);color:var(--texto2);border:1px solid var(--borde2);border-radius:5px;padding:1px 6px;background:var(--fondo)}
+.buscar.lleno kbd{display:none}
+@media(pointer:coarse){.buscar kbd{display:none}}
+.cats{display:flex;gap:6px;overflow-x:auto;padding:10px 2px 2px;scrollbar-width:thin}
+.cat{flex:0 0 auto;min-height:36px;border:1px solid var(--borde2);background:#fff;border-radius:999px;padding:0 14px;cursor:pointer;font-size:14px;white-space:nowrap}
+.cat span{color:var(--texto2);margin-left:4px;font-size:13px}
+.cat[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);color:#fff}
+.cat[aria-pressed="true"] span{color:#cfe3f1}
+
+/* Acciones en bloque */
+.acciones{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 4px}
+.total{font-weight:700;color:var(--azul);margin-right:4px}
+.btn{min-height:44px;border-radius:12px;border:1px solid var(--borde2);background:#fff;color:var(--azul);padding:0 14px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--azul2)}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.btn.prim{background:var(--azul);border-color:var(--azul);color:#fff}
+.btn.prim:hover{background:var(--azul2)}
+.btn.peligro{color:var(--error);border-color:#e3bcbc}
+.btn.hecho{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn svg{width:18px;height:18px;flex:0 0 auto}
+.copias{display:contents}
+.der{margin-left:auto;display:flex;gap:8px}
+.seg{display:inline-flex;border:1px solid var(--borde2);border-radius:12px;overflow:hidden;background:#fff}
+.seg button{min-height:42px;border:0;background:none;padding:0 10px;cursor:pointer;font-size:13px;color:var(--texto2)}
+.seg button[aria-pressed="true"]{background:var(--copiado);color:var(--azul);font-weight:700}
+.prog{display:none;align-items:center;gap:8px;font-size:13px;color:var(--texto2);margin:2px 0 6px}
+.prog.on{display:flex}
+.prog .bar{flex:0 1 220px;height:6px;border-radius:9px;background:var(--borde);overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--acento);width:0;transition:width .25s}
+.prog button{border:0;background:none;color:var(--enlace);cursor:pointer;text-decoration:underline;padding:4px}
+
+.aviso{background:var(--avisoFondo);color:var(--aviso);border:1px solid #F0DCA8;border-radius:10px;padding:10px 14px;margin:12px 0 0;font-size:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.aviso button{border:0;background:none;color:var(--enlace);text-decoration:underline;cursor:pointer;padding:0;font-weight:500}
+
+/* Listado */
+main{padding-bottom:64px}
+.grupo h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--texto2);margin:22px 2px 8px;font-weight:700}
+.grupo h2 span{font-weight:400;margin-left:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
+@media(max-width:420px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--borde);border-radius:16px;padding:14px 14px 12px;box-shadow:0 1px 4px rgba(25,59,87,.06);display:flex;flex-direction:column;gap:10px;min-width:0}
+.card-top{display:flex;gap:10px;align-items:flex-start}
+.av{flex:0 0 38px;height:38px;border-radius:50%;background:#E7F0F7;color:var(--azul);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.card h3{margin:0;font-size:16px;line-height:1.3;color:var(--azul);font-weight:700;word-break:break-word}
+.meta{margin:2px 0 0;font-size:13px;color:var(--texto2);line-height:1.4}
+.persona{margin:2px 0 0;font-size:13px}
+.edit{margin-left:auto;flex:0 0 36px;height:36px;border:0;background:none;border-radius:8px;cursor:pointer;color:var(--texto2)}
+.edit:hover{background:var(--fondo);color:var(--azul)}
+.edit svg{width:18px;height:18px}
+mark{background:#FFF0A8;color:inherit;border-radius:3px;padding:0 1px}
+.datos{display:flex;flex-wrap:wrap;gap:6px}
+.dato{display:inline-flex;align-items:stretch;max-width:100%;border:1px solid var(--borde);border-radius:10px;background:var(--fondo);overflow:hidden}
+.dato button{min-height:38px;border:0;background:none;cursor:pointer;padding:0 10px;display:flex;align-items:center;gap:6px;font-size:14px;color:var(--texto);min-width:0;text-align:left}
+.dato button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dato svg{width:15px;height:15px;flex:0 0 auto;color:var(--texto2)}
+.dato:hover{border-color:var(--azul2)}
+.dato.ok{background:var(--copiado);border-color:var(--acento)}
+.dato.ok svg{color:var(--azul2)}
+.dato a{display:flex;align-items:center;padding:0 9px;border-left:1px solid var(--borde);color:var(--texto2)}
+.dato a:hover{color:var(--ok);background:#fff}
+.nota{font-size:13px;color:var(--texto2);margin:0;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vacio{background:#fff;border:1px dashed var(--borde2);border-radius:16px;padding:28px 20px;text-align:center;margin-top:20px}
+.vacio p{margin:0 0 12px}
+.cargando{color:var(--texto2);padding:40px 0;text-align:center}
+
+/* Menú */
+.menu{position:relative}
+.menu-lista{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--borde);border-radius:12px;box-shadow:0 8px 24px rgba(25,59,87,.14);min-width:260px;padding:6px;display:none;z-index:30}
+.menu-lista.on{display:block}
+.menu-lista button,.menu-lista a{display:block;width:100%;text-align:left;border:0;background:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--texto);text-decoration:none}
+.menu-lista button:hover,.menu-lista a:hover{background:var(--fondo)}
+.menu-lista hr{border:0;border-top:1px solid var(--borde);margin:6px 0}
+
+/* Modal */
+dialog{border:0;border-radius:16px;padding:0;width:min(640px,calc(100% - 24px));max-height:calc(100% - 24px);color:var(--texto);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(25,59,87,.45)}
+.m-head{display:flex;align-items:center;gap:8px;padding:16px 20px;border-bottom:1px solid var(--borde);position:sticky;top:0;background:#fff;z-index:1}
+.m-head h2{margin:0;font-size:18px;color:var(--azul)}
+.m-head .x{margin-left:auto;width:40px;height:40px;border:0;background:none;font-size:24px;cursor:pointer;border-radius:8px;color:var(--texto2)}
+.m-body{padding:16px 20px;display:grid;gap:12px}
+.m-foot{display:flex;gap:8px;padding:12px 20px 18px;flex-wrap:wrap;position:sticky;bottom:0;background:#fff;border-top:1px solid var(--borde)}
+.fila2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.fila2{grid-template-columns:1fr}}
+.campo label{display:block;font-size:13px;font-weight:500;margin:0 0 4px}
+.campo label i{font-style:normal;color:var(--texto2);font-weight:400}
+.campo input,.campo select,.campo textarea{width:100%;min-height:44px;border:1px solid var(--borde2);border-radius:8px;padding:9px 10px;background:#fff}
+.campo textarea{min-height:80px;resize:vertical}
+.campo input:focus,.campo select:focus,.campo textarea:focus{outline:none;border-color:var(--azul2);box-shadow:0 0 0 3px rgba(41,168,224,.25)}
+.campo .ayuda{font-size:12px;color:var(--texto2);margin:4px 0 0}
+.campo .dup{font-size:13px;color:var(--error);margin:6px 0 0;font-weight:500}
+.campo .dup button{border:0;background:none;color:var(--enlace);text-decoration:underline;cursor:pointer;padding:0;font:inherit}
+.campo.mal input{border-color:var(--error)}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.checks label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--borde2);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;font-weight:400;margin:0}
+.checks input{width:18px;height:18px;min-height:0;margin:0}
+.msg{font-size:14px;border-radius:8px;padding:10px 12px;margin:0}
+.msg.error{background:#F9E6E6;color:var(--error)}
+.msg.ok{background:#E2F3EA;color:var(--ok)}
+.lista-res{font-size:14px;max-height:220px;overflow:auto;border:1px solid var(--borde);border-radius:8px;padding:8px 12px;margin:0;background:var(--fondo)}
+.lista-res li{margin:2px 0}
+.dif-fila{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border:1px solid var(--borde);border-radius:10px;padding:8px 10px}
+.dif-fila input{flex:1 1 200px;min-height:40px;border:1px solid var(--borde2);border-radius:8px;padding:6px 10px}
+.dif-fila .etq{font-size:12px;color:var(--texto2);min-width:72px}
+
+/* Aviso flotante */
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--azul);color:#fff;padding:12px 18px;border-radius:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:100;max-width:calc(100% - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--error)}
+
+footer{color:var(--texto2);font-size:12px;padding:24px 0 32px;border-top:1px solid var(--borde);margin-top:24px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(max-width:600px){
+  .top h1{font-size:20px}.top img{height:28px}
+  .acciones{gap:6px}
+  .copias{display:flex;gap:6px;overflow-x:auto;width:100%;padding-bottom:2px;scrollbar-width:none}
+  .copias .btn{min-height:40px;padding:0 10px}
+  .acciones .der{margin-left:0;width:100%}
+  .acciones .der .btn{flex:1;justify-content:center}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <img src="https://www.mpba.gov.ar/assets/images/logo2021w.png" alt="Ministerio Público de la Provincia de Buenos Aires" onerror="this.remove()">
+    <div class="tit"><small>Comunicación Digital</small><h1>Difusión</h1></div>
+    <span class="estado" id="estado" role="status">Cargando…</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="difs" id="difs" aria-label="Difusiones"></nav>
+  <div id="avisos"></div>
+</div>
+
+<div class="barra" id="barra">
+  <div class="wrap">
+    <div class="buscar" id="buscarBox">
+      <label for="q">Buscar contacto</label>
+      <svg class="lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Medio, persona, universidad, mail, @usuario, zona…">
+      <button class="limpiar" id="limpiar" type="button" aria-label="Borrar búsqueda">×</button>
+      <kbd aria-hidden="true">/</kbd>
+    </div>
+    <div class="cats" id="cats" role="group" aria-label="Categorías"></div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="acciones" id="acciones">
+    <span class="total" id="total" aria-live="polite"></span>
+    <div class="copias">
+    <button class="btn" id="cpMails" type="button"></button>
+    <span class="seg" role="group" aria-label="Formato de Instagram">
+      <button type="button" id="conArroba" aria-pressed="true">con @</button>
+      <button type="button" id="sinArroba" aria-pressed="false">sin @</button>
+    </span>
+    <button class="btn" id="cpIG" type="button"></button>
+    <button class="btn" id="cpWA" type="button"></button>
+    </div>
+    <div class="der">
+      <button class="btn prim" id="btnAgregar" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Agregar contacto</button>
+      <div class="menu">
+        <button class="btn" id="btnMas" type="button" aria-haspopup="true" aria-expanded="false">Más</button>
+        <div class="menu-lista" id="menuMas" role="menu">
+          <button role="menuitem" type="button" data-accion="importar">Importar lista de contactos</button>
+          <button role="menuitem" type="button" data-accion="sumar">Sumar los visibles a una difusión</button>
+          <button role="menuitem" type="button" data-accion="quitar" id="mQuitar">Quitar los visibles de esta difusión</button>
+          <button role="menuitem" type="button" data-accion="difusiones">Crear o archivar difusiones</button>
+          <hr>
+          <button role="menuitem" type="button" data-accion="csv">Descargar los visibles (CSV)</button>
+          <a role="menuitem" id="mPlanilla" href="#" target="_blank" rel="noopener">Abrir la planilla</a>
+          <button role="menuitem" type="button" data-accion="actualizar">Actualizar desde la planilla</button>
+          <button role="menuitem" type="button" data-accion="salir">Olvidar clave en este navegador</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="prog" id="prog"><span id="progTxt"></span><span class="bar"><i id="progBar"></i></span><button type="button" id="progReset">Reiniciar</button></div>
+  <div id="lista"><p class="cargando">Cargando contactos…</p></div>
+  <footer>Difusión · Comunicación Digital MPBA · v1.0 · Datos: <a id="pieFuente" href="#" target="_blank" rel="noopener">planilla de contactos</a> · Atajos: <b>/</b> buscar, <b>Esc</b> limpiar</footer>
+</main>
+
+<!-- Contacto -->
+<dialog id="dContacto" aria-labelledby="dcTit">
+  <form id="fContacto" novalidate>
+    <div class="m-head"><h2 id="dcTit">Agregar contacto</h2><button class="x" type="button" data-cerrar aria-label="Cerrar">×</button></div>
+    <div class="m-body">
+      <div class="fila2">
+        <div class="campo"><label for="fCat">Categoría</label><select id="fCat" name="Categoría" required></select></div>
+        <div class="campo" id="campoCatNueva" hidden><label for="fCatNueva">Nombre de la categoría nueva</label><input id="fCatNueva"></div>
+      </div>
+      <div class="campo" data-k="Nombre"><label for="fNombre">Nombre <i>(medio, institución o persona)</i></label><input id="fNombre" name="Nombre" required autocomplete="off"><p class="dup" hidden></p></div>
+      <div class="fila2">
+        <div class="campo"><label for="fDetalle">Detalle <i>(sección, facultad, cargo)</i></label><input id="fDetalle" name="Detalle" autocomplete="off"></div>
+        <div class="campo"><label for="fPersona">Persona de contacto</label><input id="fPersona" name="Persona" autocomplete="off"></div>
+      </div>
+      <div class="fila2">
+        <div class="campo" data-k="Mail"><label for="fMail">Mail</label><input id="fMail" name="Mail" inputmode="email" autocomplete="off"><p class="ayuda">Si son varios, separalos con coma.</p><p class="dup" hidden></p></div>
+        <div class="campo" data-k="Instagram"><label for="fIG">Instagram</label><input id="fIG" name="Instagram" autocomplete="off" autocapitalize="none"><p class="ayuda">Usuario o link del perfil.</p><p class="dup" hidden></p></div>
+      </div>
+      <div class="fila2">
+        <div class="campo" data-k="WhatsApp"><label for="fWA">WhatsApp</label><input id="fWA" name="WhatsApp" inputmode="tel" autocomplete="off"><p class="dup" hidden></p></div>
+        <div class="campo"><label for="fTel">Teléfono</label><input id="fTel" name="Teléfono" inputmode="tel" autocomplete="off"></div>
+      </div>
+      <div class="fila2">
+        <div class="campo"><label for="fZona">Zona o ciudad</label><input id="fZona" name="Zona" autocomplete="off" list="zonas"><datalist id="zonas"></datalist></div>
+        <div class="campo"><label for="fVer">Verificado</label><select id="fVer" name="Verificado"><option value=""></option><option>Sí</option><option>Parcial</option><option>Sin revisar</option></select></div>
+      </div>
+      <div class="campo"><span id="lblDifs" style="display:block;font-size:13px;font-weight:500;margin:0 0 6px">Difusiones</span><div class="checks" id="fDifs" role="group" aria-labelledby="lblDifs"></div></div>
+      <div class="campo"><label for="fNotas">Notas</label><textarea id="fNotas" name="Notas"></textarea></div>
+      <p class="msg error" id="fErr" hidden></p>
+    </div>
+    <div class="m-foot">
+      <button class="btn prim" type="submit" id="fGuardar">Guardar contacto</button>
+      <button class="btn" type="button" data-cerrar>Cancelar</button>
+      <button class="btn peligro" type="button" id="fBorrar" style="margin-left:auto" hidden>Borrar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Clave -->
+<dialog id="dClave" aria-labelledby="dkTit">
+  <form id="fClave">
+    <div class="m-head"><h2 id="dkTit">Clave</h2><button class="x" type="button" data-cerrar aria-label="Cerrar">×</button></div>
+    <div class="m-body">
+      <p style="margin:0" id="kTxt">Ingresá la clave de carga. Queda guardada en este navegador.</p>
+      <div class="campo"><label for="kInput">Clave</label><input id="kInput" type="password" autocomplete="current-password" required></div>
+      <p class="msg error" id="kErr" hidden></p>
+    </div>
+    <div class="m-foot"><button class="btn prim" type="submit">Continuar</button><button class="btn" type="button" data-cerrar>Cancelar</button></div>
+  </form>
+</dialog>
+
+<!-- Importar -->
+<dialog id="dImportar" aria-labelledby="diTit">
+  <form id="fImportar">
+    <div class="m-head"><h2 id="diTit">Importar lista de contactos</h2><button class="x" type="button" data-cerrar aria-label="Cerrar">×</button></div>
+    <div class="m-body">
+      <div class="campo"><label for="iTexto">Pegá la lista</label>
+        <textarea id="iTexto" style="min-height:160px" placeholder="@cuenta1&#10;@cuenta2&#10;prensa@medio.com.ar&#10;&#10;o filas copiadas de una planilla, con encabezado"></textarea>
+        <p class="ayuda">Un contacto por línea. Sirve una columna de @usuarios o mails, o filas copiadas de una planilla con encabezado (Nombre, Mail, Instagram, WhatsApp, Zona…).</p></div>
+      <div class="fila2">
+        <div class="campo"><label for="iCat">Categoría</label><select id="iCat" required></select></div>
+        <div class="campo"><label for="iDif">Sumar a la difusión <i>(opcional)</i></label><select id="iDif"></select></div>
+      </div>
+      <div id="iPrev"></div>
+    </div>
+    <div class="m-foot"><button class="btn prim" type="submit" id="iBtn" disabled>Importar</button><button class="btn" type="button" data-cerrar>Cerrar</button></div>
+  </form>
+</dialog>
+
+<!-- Sumar / quitar de difusión -->
+<dialog id="dSumar" aria-labelledby="dsTit">
+  <form id="fSumar">
+    <div class="m-head"><h2 id="dsTit">Sumar a una difusión</h2><button class="x" type="button" data-cerrar aria-label="Cerrar">×</button></div>
+    <div class="m-body">
+      <p style="margin:0" id="sTxt"></p>
+      <div class="campo"><label for="sDif">Difusión</label><select id="sDif"></select></div>
+      <div class="campo" id="sNuevaBox" hidden><label for="sNueva">Nombre de la difusión nueva</label><input id="sNueva" placeholder="Ej.: Congreso de Derecho Animal"></div>
+      <p class="msg error" id="sErr" hidden></p>
+    </div>
+    <div class="m-foot"><button class="btn prim" type="submit" id="sBtn">Sumar</button><button class="btn" type="button" data-cerrar>Cancelar</button></div>
+  </form>
+</dialog>
+
+<!-- Difusiones -->
+<dialog id="dDifs" aria-labelledby="ddTit">
+  <form id="fDifsGestion">
+    <div class="m-head"><h2 id="ddTit">Difusiones</h2><button class="x" type="button" data-cerrar aria-label="Cerrar">×</button></div>
+    <div class="m-body">
+      <p class="ayuda" style="margin:0;color:var(--texto2);font-size:13px">Las activas aparecen como botones arriba. Archivar no borra nada: los contactos conservan la etiqueta.</p>
+      <div id="ddLista" style="display:grid;gap:8px"></div>
+      <div class="campo"><label for="ddNueva">Nueva difusión</label><input id="ddNueva" placeholder="Ej.: Congreso de Derecho Animal y Protección Integral"></div>
+      <p class="msg error" id="ddErr" hidden></p>
+    </div>
+    <div class="m-foot"><button class="btn prim" type="submit">Crear difusión</button><button class="btn" type="button" data-cerrar>Cerrar</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =====================================================================
+   CONFIGURACIÓN · pegar la URL de la implementación de Apps Script (/exec)
+   ===================================================================== */
+const CONFIG = {
+  API: 'PEGAR_URL_APPS_SCRIPT_AQUI',
+  PLANILLA: 'https://docs.google.com/spreadsheets/d/1Q-rM3M1RI5FVxEmsVM9x2C6ovYVcBXTUbhxsccVmF4k/edit',
+  LIMITE_IG: 20            // menciones por publicación en Instagram
+};
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9@._]+/g, ' ').trim();
+const normK = s => norm(s).replace(/[@._]+/g, ' ').replace(/\s+/g, ' ').trim();
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('difusion.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('difusion.' + k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem('difusion.' + k); } catch (e) {} }
+};
+const mailsDe = s => String(s || '').toLowerCase().split(/[\s,;/]+/).map(x => x.replace(/^\.+|\.+$/g, ''))
+  .filter(x => /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/.test(x));
+const igsDe = s => String(s || '').split(/[\s,;]+/).map(p => {
+  const m = p.match(/instagram\.com\/([A-Za-z0-9._]+)/);
+  return (m ? m[1] : p).replace(/^@/, '').replace(/\/+$/, '').toLowerCase();
+}).filter(h => /^[a-z0-9._]{2,30}$/.test(h));
+function telClave(s) {
+  let d = String(s || '').replace(/\D/g, '');
+  if (d.startsWith('54')) d = d.slice(2);
+  if (d.startsWith('9') && d.length === 11) d = d.slice(1);
+  if (d.startsWith('0')) d = d.slice(1);
+  if (d.length > 10) d = d.replace(/^(\d{2,4})15/, '$1');
+  return d.length >= 8 ? d.slice(-10) : '';
+}
+const lista = s => String(s || '').split(/[;,/]/).map(x => x.trim()).filter(Boolean);
+const iniciales = n => (String(n).replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(w => w.length > 1 || /\d/.test(w)).slice(0, 2).map(w => w[0]).join('') || '·').toUpperCase();
+
+const ICON = {
+  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  ig: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
+  wa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.2A8.5 8.5 0 1 1 20 11.5Z"/></svg>',
+  tel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
+  abrir: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  editar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4ZM14 6l4 4"/></svg>',
+  copiar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>'
+};
+
+/* ---------- estado ---------- */
+const S = {
+  contactos: [], categorias: [], difusiones: [], planilla: CONFIG.PLANILLA,
+  dif: '', cat: '', q: '', arroba: LS.get('arroba', true),
+  igTanda: 0, igFirma: '', copiados: new Set(), soloRepetidos: false
+};
+
+function preparar(c) {
+  c._mails = mailsDe(c.Mail);
+  c._igs = igsDe(c.Instagram);
+  c._was = lista(c.WhatsApp);
+  c._tels = lista(c['Teléfono']);
+  c._difs = lista(c.Difusiones).map(s => s.trim());
+  c._n = norm(c.Nombre);
+  c._busq = norm([c.Nombre, c.Detalle, c.Persona, c['Categoría'], c.Zona, c.Notas, c.Difusiones,
+    c._mails.join(' '), c._igs.map(h => '@' + h + ' ' + h).join(' ')].join(' ')) + ' ' +
+    c._was.concat(c._tels).map(t => t.replace(/\D/g, '')).join(' ');
+  return c;
+}
+
+/* ---------- datos ---------- */
+async function api(cuerpo) {
+  if (!CONFIG.API || CONFIG.API.includes('PEGAR_')) throw new Error('Falta conectar la planilla (URL de Apps Script).');
+  const r = await fetch(CONFIG.API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(cuerpo) });
+  if (!r.ok) throw new Error('La planilla no respondió (' + r.status + ').');
+  return r.json();
+}
+
+function aplicarDatos(d) {
+  S.contactos = (d.contactos || []).map(preparar);
+  S.categorias = d.categorias || [];
+  S.difusiones = d.difusiones || [];
+  if (d.planilla) S.planilla = CONFIG.PLANILLA || d.planilla;
+}
+
+async function cargar(silencioso) {
+  const cache = LS.get('cache', null);
+  if (cache && !S.contactos.length) { aplicarDatos(cache); render(); estado('Copia local · actualizando…'); }
+  try {
+    const d = await api({ accion: 'datos', clave: LS.get('clave', '') });
+    if (!d.ok && d.error === 'clave') { await pedirClave('Esta agenda está protegida. Ingresá la clave de acceso del equipo.'); return cargar(silencioso); }
+    if (!d.ok) throw new Error(d.mensaje || 'Error al leer la planilla.');
+    aplicarDatos(d);
+    LS.set('cache', { contactos: d.contactos, categorias: d.categorias, difusiones: d.difusiones, planilla: d.planilla, fecha: d.actualizado });
+    estado('Actualizado ' + hora(d.actualizado));
+    render();
+    if (silencioso === false) toast('Datos actualizados');
+  } catch (e) {
+    if (cache) estado('Sin conexión · copia del ' + fecha(cache.fecha), true);
+    else { estado('Sin datos', true); renderSinDatos(e.message); }
+  }
+}
+const hora = iso => { try { return new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+const fecha = iso => { try { return new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch (e) { return '—'; } };
+function estado(t, err) { const e = $('#estado'); e.textContent = t; e.classList.toggle('err', !!err); }
+
+/* ---------- filtro ---------- */
+function enDifusion(c) { return !S.dif || c._difs.includes(S.dif); }
+function coincide(c, palabras) { return palabras.every(p => c._busq.includes(p)); }
+function palabras() {
+  return norm(S.q).split(/\s+/).filter(Boolean).map(p => /^\d[\d\s-]*$/.test(p) ? p.replace(/\D/g, '') : p);
+}
+function visibles() {
+  const p = palabras();
+  const rep = S.soloRepetidos ? repetidos().ids : null;
+  return S.contactos.filter(c => enDifusion(c) && (!S.cat || c['Categoría'] === S.cat) && (!p.length || coincide(c, p)) && (!rep || rep.has(c.ID)));
+}
+function ordenar(arr) {
+  const q = norm(S.q);
+  const peso = c => !q ? 0 : c._n.startsWith(q) ? 0 : c._n.includes(q) ? 1 : 2;
+  return arr.sort((a, b) => peso(a) - peso(b) || a._n.localeCompare(b._n, 'es'));
+}
+
+/** Detecta repetidos que hayan entrado editando la planilla a mano. */
+function repetidos() {
+  const visto = {}, ids = new Set();
+  S.contactos.forEach(c => {
+    const ks = c._mails.map(m => 'm' + m).concat(c._igs.map(i => 'i' + i), c._was.map(telClave).filter(Boolean).map(w => 'w' + w), ['n' + normK(c.Nombre + ' ' + c.Detalle)]);
+    ks.forEach(k => { if (visto[k] && visto[k] !== c.ID) { ids.add(c.ID); ids.add(visto[k]); } else visto[k] = c.ID; });
+  });
+  return { ids };
+}
+
+/* ---------- render ---------- */
+function render() {
+  const p = palabras();
+  const enDif = S.contactos.filter(enDifusion);
+  // difusiones
+  const activas = S.difusiones.filter(d => d.estado !== 'Archivada');
+  if (S.dif && !S.difusiones.some(d => d.nombre === S.dif)) S.dif = '';
+  const botones = [{ nombre: '', etq: 'Todos los contactos' }].concat(activas.map(d => ({ nombre: d.nombre, etq: d.nombre })));
+  if (S.dif && !activas.some(d => d.nombre === S.dif)) botones.push({ nombre: S.dif, etq: S.dif + ' (archivada)' });
+  $('#difs').innerHTML = botones.map(b => {
+    const n = b.nombre ? S.contactos.filter(c => c._difs.includes(b.nombre)).length : S.contactos.length;
+    return `<button class="dif" type="button" data-dif="${esc(b.nombre)}" aria-pressed="${S.dif === b.nombre}"><b>${esc(b.etq)}</b><span>${n === 1 ? '1 contacto' : n + ' contactos'}</span></button>`;
+  }).join('');
+
+  // avisos
+  const rep = repetidos().ids;
+  $('#avisos').innerHTML = S.soloRepetidos
+    ? `<div class="aviso">Mostrando solo contactos repetidos. Editá o borrá uno de cada par. <button type="button" data-aviso="todos">Ver todos</button></div>`
+    : rep.size ? `<div class="aviso">Hay ${rep.size} contactos que comparten mail, Instagram, WhatsApp o nombre (cargados a mano en la planilla). <button type="button" data-aviso="repetidos">Revisarlos</button></div>` : '';
+
+  // categorías (cuentan sobre difusión + búsqueda)
+  const base = enDif.filter(c => !p.length || coincide(c, p));
+  const cuenta = {};
+  base.forEach(c => { cuenta[c['Categoría']] = (cuenta[c['Categoría']] || 0) + 1; });
+  const orden = S.categorias.concat(Object.keys(cuenta).filter(k => !S.categorias.includes(k)));
+  if (S.cat && !cuenta[S.cat] && !p.length) S.cat = '';
+  $('#cats').innerHTML = `<button class="cat" type="button" data-cat="" aria-pressed="${!S.cat}">Todas<span>${base.length}</span></button>` +
+    orden.filter(k => cuenta[k] || k === S.cat).map(k => `<button class="cat" type="button" data-cat="${esc(k)}" aria-pressed="${S.cat === k}">${esc(k)}<span>${cuenta[k] || 0}</span></button>`).join('');
+
+  // listado
+  const vis = ordenar(visibles());
+  $('#total').textContent = vis.length === 1 ? '1 contacto' : vis.length + ' contactos';
+  renderAcciones(vis);
+  if (!vis.length) { renderVacio(); return; }
+  const grupos = {};
+  vis.forEach(c => (grupos[c['Categoría']] = grupos[c['Categoría']] || []).push(c));
+  const cats = orden.filter(k => grupos[k]);
+  const ws = p.filter(w => w.length > 1 && !/^\d+$/.test(w));
+  const marcar = txt => {
+    txt = String(txt || '');
+    if (!ws.length) return esc(txt);
+    const chars = [...txt];
+    const f = chars.map(ch => ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()[0] || ' ').join('');
+    const on = new Array(chars.length).fill(false);
+    ws.forEach(w => { let i = f.indexOf(w); while (i >= 0) { for (let j = i; j < i + w.length; j++) on[j] = true; i = f.indexOf(w, i + 1); } });
+    let h = '', abierto = false;
+    chars.forEach((ch, i) => { if (on[i] && !abierto) { h += '<mark>'; abierto = true; } if (!on[i] && abierto) { h += '</mark>'; abierto = false; } h += esc(ch); });
+    return h + (abierto ? '</mark>' : '');
+  };
+  $('#lista').innerHTML = cats.map(k => `<section class="grupo"><h2>${esc(k)}<span>${grupos[k].length}</span></h2><div class="grid">${grupos[k].map(c => tarjeta(c, marcar)).join('')}</div></section>`).join('');
+}
+
+function tarjeta(c, marcar) {
+  const meta = [c.Detalle, c.Zona].filter(Boolean).join(' · ');
+  const datos = [];
+  c._mails.forEach(m => datos.push(dato('mail', m, m, 'Mail')));
+  c._igs.forEach(h => datos.push(dato('ig', (S.arroba ? '@' : '') + h, '@' + h, 'Instagram', h)));
+  c._was.forEach(w => {
+    const k = telClave(w);
+    datos.push(dato('wa', w, w, 'WhatsApp', null, k ? 'https://wa.me/549' + k : ''));
+  });
+  c._tels.forEach(t => datos.push(dato('tel', t, t, 'Teléfono')));
+  return `<article class="card" data-id="${esc(c.ID)}">
+    <div class="card-top"><span class="av" aria-hidden="true">${esc(iniciales(c.Nombre))}</span>
+      <div style="min-width:0"><h3>${marcar(c.Nombre)}</h3>${meta ? `<p class="meta">${marcar(meta)}</p>` : ''}${c.Persona ? `<p class="persona">${marcar(c.Persona)}</p>` : ''}</div>
+      <button class="edit" type="button" data-editar="${esc(c.ID)}" aria-label="Editar ${esc(c.Nombre)}" title="Editar">${ICON.editar}</button></div>
+    ${datos.length ? `<div class="datos">${datos.join('')}</div>` : '<p class="nota">Sin datos de contacto cargados.</p>'}
+    ${c.Notas ? `<p class="nota" title="${esc(c.Notas)}">${esc(c.Notas)}</p>` : ''}
+  </article>`;
+}
+
+function dato(tipo, copia, texto, nombre, igHandle, enlace) {
+  const ok = S.copiados.has(tipo + ':' + texto);
+  return `<span class="dato${ok ? ' ok' : ''}"><button type="button" data-copiar="${esc(copia)}" data-tipo="${nombre}" data-marca="${esc(tipo + ':' + texto)}" title="Copiar ${nombre.toLowerCase()}">${ICON[tipo]}<span>${esc(texto)}</span></button>${enlace ? `<a href="${esc(enlace)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${ICON.abrir}</a>` : ''}</span>`;
+}
+
+function renderAcciones(vis) {
+  const mails = [...new Set(vis.flatMap(c => c._mails))];
+  const igs = [...new Set(vis.flatMap(c => c._igs))];
+  const was = [...new Set(vis.flatMap(c => c._was))];
+  $('#cpMails').innerHTML = ICON.copiar + 'Mails (' + mails.length + ')';
+  $('#cpMails').disabled = !mails.length;
+  $('#cpWA').innerHTML = ICON.copiar + 'WhatsApp (' + was.length + ')';
+  $('#cpWA').disabled = !was.length;
+  // Instagram en tandas de 20
+  const firma = S.dif + '|' + S.cat + '|' + S.q + '|' + igs.length;
+  if (firma !== S.igFirma) { S.igFirma = firma; S.igTanda = 0; }
+  const L = CONFIG.LIMITE_IG, total = igs.length, desde = S.igTanda * L;
+  const btn = $('#cpIG');
+  btn.disabled = !total;
+  btn.classList.toggle('hecho', total > 0 && desde >= total);
+  if (total <= L) btn.innerHTML = ICON.copiar + 'Instagram (' + total + ')';
+  else if (desde >= total) btn.innerHTML = '✓ Copiadas las ' + total;
+  else btn.innerHTML = ICON.copiar + 'Instagram ' + (desde + 1) + '–' + Math.min(desde + L, total) + ' de ' + total;
+  $('#prog').classList.toggle('on', total > L && S.igTanda > 0);
+  $('#progTxt').textContent = 'Instagram: ' + Math.min(desde, total) + ' de ' + total + ' copiadas';
+  $('#progBar').style.width = (total ? Math.min(desde, total) / total * 100 : 0) + '%';
+  S._vis = { vis, mails, igs, was };
+  $('#mQuitar').hidden = !S.dif;
+}
+
+function renderVacio() {
+  const q = S.q.trim();
+  if (S.dif && !S.contactos.some(c => c._difs.includes(S.dif))) {
+    $('#lista').innerHTML = `<div class="vacio"><p><b>“${esc(S.dif)}” todavía no tiene contactos.</b></p>
+      <p>Tocá <b>Todos los contactos</b>, filtrá por categoría o buscá, y después usá <b>Más → Sumar los visibles a una difusión</b>.</p>
+      <button class="btn prim" type="button" data-ir="todos">Ver todos los contactos</button></div>`;
+    return;
+  }
+  $('#lista').innerHTML = `<div class="vacio"><p>No hay contactos${q ? ` que coincidan con <b>“${esc(q)}”</b>` : ''}${S.cat ? ` en <b>${esc(S.cat)}</b>` : ''}${S.dif ? ` dentro de <b>${esc(S.dif)}</b>` : ''}.</p>
+    ${S.dif || S.cat ? '<button class="btn" type="button" data-ir="todos">Buscar en todos los contactos</button> ' : ''}
+    ${q ? `<button class="btn prim" type="button" data-ir="agregar">Agregar “${esc(q)}”</button>` : ''}</div>`;
+}
+
+function renderSinDatos(msg) {
+  $('#lista').innerHTML = `<div class="vacio"><p><b>No se pudieron cargar los contactos.</b></p><p>${esc(msg)}</p>
+    <button class="btn prim" type="button" data-ir="reintentar">Reintentar</button></div>`;
+  renderAcciones([]); $('#total').textContent = '';
+}
+
+/* ---------- copiar ---------- */
+async function copiar(txt) {
+  try { await navigator.clipboard.writeText(txt); return true; }
+  catch (e) {
+    const t = document.createElement('textarea'); t.value = txt; t.style.position = 'fixed'; t.style.opacity = '0';
+    document.body.appendChild(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
+    t.remove(); return ok;
+  }
+}
+let toastT;
+function toast(msg, err) {
+  const t = $('#toast'); t.textContent = msg; t.classList.toggle('err', !!err); t.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), err ? 4000 : 1800);
+}
+function marcarCopiados(claves) { claves.forEach(k => S.copiados.add(k)); guardarCopiados(); }
+function guardarCopiados() { LS.set('copiados', [...S.copiados].slice(-2000)); }
+
+async function copiarMails() {
+  const m = S._vis.mails; if (!m.length) return;
+  if (await copiar(m.join(', '))) { marcarCopiados(m.map(x => 'mail:' + x)); render(); toast(m.length + (m.length === 1 ? ' mail copiado' : ' mails copiados') + ' · listos para pegar en CCO'); }
+}
+async function copiarIG() {
+  const igs = S._vis.igs, L = CONFIG.LIMITE_IG;
+  if (!igs.length) return;
+  let desde = S.igTanda * L;
+  if (desde >= igs.length) { S.igTanda = 0; desde = 0; }
+  const tanda = igs.slice(desde, desde + L);
+  const txt = tanda.map(h => (S.arroba ? '@' : '') + h).join(S.arroba ? ' ' : '\n');
+  if (await copiar(txt)) {
+    marcarCopiados(tanda.map(h => 'ig:@' + h));
+    S.igTanda++;
+    render();
+    const fin = desde + tanda.length;
+    toast(igs.length > L ? `Cuentas ${desde + 1}–${fin} copiadas${fin < igs.length ? ' · tocá de nuevo para las siguientes' : ''}` : tanda.length + (tanda.length === 1 ? ' cuenta copiada' : ' cuentas copiadas'));
+  }
+}
+async function copiarWA() {
+  const w = S._vis.was; if (!w.length) return;
+  if (await copiar(w.join('\n'))) { marcarCopiados(w.map(x => 'wa:' + x)); render(); toast(w.length + ' números copiados'); }
+}
+
+/* ---------- clave ---------- */
+function pedirClave(texto) {
+  return new Promise((ok, no) => {
+    const d = $('#dClave');
+    $('#kTxt').textContent = texto || 'Ingresá la clave de carga. Queda guardada en este navegador.';
+    $('#kErr').hidden = true; $('#kInput').value = '';
+    d._resolver = ok; d._rechazar = no;
+    abrir(d); setTimeout(() => $('#kInput').focus(), 30);
+  });
+}
+$('#fClave').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = $('#kInput').value.trim(); if (!v) return;
+  LS.set('clave', v); const d = $('#dClave'); d._rechazar = null; d.close(); d._resolver && d._resolver(v);
+});
+$('#dClave').addEventListener('close', () => { const d = $('#dClave'); if (d._rechazar) { d._rechazar(new Error('cancelado')); d._rechazar = null; } });
+
+/** Ejecuta una escritura; si la clave falta o es incorrecta, la pide y reintenta. */
+async function escribir(cuerpo) {
+  if (!LS.get('clave', '')) await pedirClave();
+  for (let i = 0; i < 3; i++) {
+    const r = await api(Object.assign({}, cuerpo, { clave: LS.get('clave', '') }));
+    if (r.ok || r.error !== 'clave') return r;
+    LS.del('clave');
+    await pedirClave('La clave no es correcta. Probá de nuevo.');
+  }
+  throw new Error('Clave incorrecta.');
+}
+
+/* ---------- modales ---------- */
+function abrir(d) { if (!d.open) d.showModal(); }
+document.querySelectorAll('dialog').forEach(d => {
+  d.addEventListener('click', e => { if (e.target === d || e.target.closest('[data-cerrar]')) d.close(); });
+});
+
+/* ---------- alta / edición ---------- */
+let editando = null;
+function opcionesCategorias(sel, valor, conNueva) {
+  const cats = S.categorias.length ? S.categorias : [...new Set(S.contactos.map(c => c['Categoría']))];
+  sel.innerHTML = '<option value="">Elegí una categoría</option>' + cats.map(c => `<option${c === valor ? ' selected' : ''}>${esc(c)}</option>`).join('') + (conNueva ? '<option value="__nueva">+ Categoría nueva…</option>' : '');
+}
+function abrirContacto(c, prellenar) {
+  editando = c || null;
+  const f = $('#fContacto'); f.reset();
+  $('#dcTit').textContent = c ? 'Editar contacto' : 'Agregar contacto';
+  $('#fGuardar').textContent = c ? 'Guardar cambios' : 'Guardar contacto';
+  $('#fBorrar').hidden = !c; $('#fBorrar').textContent = 'Borrar'; $('#fBorrar').dataset.confirmar = '';
+  $('#fErr').hidden = true; $('#campoCatNueva').hidden = true;
+  opcionesCategorias($('#fCat'), c ? c['Categoría'] : (S.cat || ''), true);
+  const v = c || prellenar || {};
+  ['Nombre', 'Detalle', 'Persona', 'WhatsApp', 'Teléfono', 'Zona', 'Notas', 'Verificado'].forEach(k => { const el = f.elements[k]; if (el) el.value = v[k] || ''; });
+  f.elements.Mail.value = c ? c._mails.join(', ') : (v.Mail || '');
+  f.elements.Instagram.value = c ? c._igs.map(h => '@' + h).join(', ') : (v.Instagram || '');
+  $('#zonas').innerHTML = [...new Set(S.contactos.map(x => x.Zona).filter(Boolean))].sort().map(z => `<option value="${esc(z)}">`).join('');
+  const difsSel = c ? c._difs : (S.dif ? [S.dif] : []);
+  const difs = S.difusiones.filter(d => d.estado !== 'Archivada' || difsSel.includes(d.nombre));
+  $('#fDifs').innerHTML = difs.length ? difs.map(d => `<label><input type="checkbox" value="${esc(d.nombre)}"${difsSel.includes(d.nombre) ? ' checked' : ''}>${esc(d.nombre)}</label>`).join('') : '<span class="ayuda">No hay difusiones creadas.</span>';
+  revisarDuplicados();
+  abrir($('#dContacto'));
+  setTimeout(() => (c ? $('#fNombre') : (v.Nombre ? $('#fCat') : $('#fNombre'))).focus(), 30);
+}
+$('#fCat').addEventListener('change', () => { const n = $('#fCat').value === '__nueva'; $('#campoCatNueva').hidden = !n; if (n) $('#fCatNueva').focus(); });
+
+function datosFormulario() {
+  const f = $('#fContacto').elements, o = {};
+  ['Nombre', 'Detalle', 'Persona', 'Mail', 'Instagram', 'WhatsApp', 'Teléfono', 'Zona', 'Notas', 'Verificado'].forEach(k => o[k] = f[k].value.trim());
+  o['Categoría'] = $('#fCat').value === '__nueva' ? $('#fCatNueva').value.trim() : $('#fCat').value;
+  o.Difusiones = [...$('#fDifs').querySelectorAll('input:checked')].map(i => i.value).join(', ');
+  if (editando) o.ID = editando.ID;
+  return o;
+}
+
+/** Busca, campo por campo, si el dato ya está cargado en otro contacto. */
+function duplicadosDe(o) {
+  const otros = S.contactos.filter(c => !o.ID || c.ID !== o.ID);
+  const res = {};
+  const m = mailsDe(o.Mail); const hitM = m.length && otros.find(c => c._mails.some(x => m.includes(x)));
+  if (hitM) res.Mail = hitM;
+  const ig = igsDe(o.Instagram); const hitI = ig.length && otros.find(c => c._igs.some(x => ig.includes(x)));
+  if (hitI) res.Instagram = hitI;
+  const w = lista(o.WhatsApp).map(telClave).filter(Boolean); const hitW = w.length && otros.find(c => c._was.map(telClave).some(x => w.includes(x)));
+  if (hitW) res.WhatsApp = hitW;
+  const n = normK(o.Nombre + ' ' + o.Detalle); const hitN = o.Nombre && otros.find(c => normK(c.Nombre + ' ' + c.Detalle) === n);
+  if (hitN) res.Nombre = hitN;
+  return res;
+}
+function revisarDuplicados() {
+  const o = datosFormulario(), dups = duplicadosDe(o);
+  document.querySelectorAll('#fContacto .campo[data-k]').forEach(el => {
+    const k = el.dataset.k, p = el.querySelector('.dup'), hit = dups[k];
+    el.classList.toggle('mal', !!hit); p.hidden = !hit;
+    if (hit) p.innerHTML = `Ya está cargado en <b>${esc(hit.Nombre)}</b> (${esc(hit['Categoría'])}). <button type="button" data-ver="${esc(hit.ID)}">Abrir ese contacto</button>`;
+  });
+  const hay = Object.keys(dups).length > 0;
+  $('#fGuardar').disabled = hay;
+  $('#fGuardar').title = hay ? 'Hay datos que ya pertenecen a otro contacto' : '';
+  return hay;
+}
+$('#fContacto').addEventListener('input', revisarDuplicados);
+$('#fContacto').addEventListener('click', e => {
+  const b = e.target.closest('[data-ver]'); if (!b) return;
+  const c = S.contactos.find(x => x.ID === b.dataset.ver); if (c) abrirContacto(c);
+});
+
+$('#fContacto').addEventListener('submit', async e => {
+  e.preventDefault();
+  const o = datosFormulario(), err = $('#fErr');
+  const mal = m => { err.textContent = m; err.hidden = false; };
+  err.hidden = true;
+  if (!o['Categoría']) return mal('Elegí una categoría.');
+  if (!o.Nombre) return mal('Completá el nombre.');
+  if (o.Mail && !mailsDe(o.Mail).length) return mal('El mail no parece válido. Revisalo.');
+  if (o.Instagram && !igsDe(o.Instagram).length) return mal('El usuario de Instagram no parece válido.');
+  if (!o.Mail && !o.Instagram && !o.WhatsApp && !o['Teléfono'] && !o.Persona) return mal('Cargá al menos un dato de contacto: mail, Instagram, WhatsApp o teléfono.');
+  if (revisarDuplicados()) return mal('Hay datos que ya pertenecen a otro contacto.');
+  const btn = $('#fGuardar'); btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    const r = await escribir({ accion: 'guardar', contacto: o });
+    if (!r.ok) {
+      if (r.error === 'duplicado' && r.existente) { preparar(r.existente); mal(`Ya existe: ${r.existente.Nombre} (${r.campo}). No se guardó.`); }
+      else mal(r.mensaje || 'No se pudo guardar.');
+      return;
+    }
+    const nuevo = preparar(r.contacto);
+    const i = S.contactos.findIndex(c => c.ID === nuevo.ID);
+    if (i >= 0) S.contactos[i] = nuevo; else S.contactos.push(nuevo);
+    if (!S.categorias.includes(nuevo['Categoría'])) S.categorias.push(nuevo['Categoría']);
+    guardarCache(); $('#dContacto').close(); render();
+    toast(i >= 0 ? 'Cambios guardados' : 'Contacto agregado');
+  } catch (ex) { if (ex.message !== 'cancelado') mal(ex.message + ' Probá de nuevo en unos segundos.'); }
+  finally { btn.textContent = editando ? 'Guardar cambios' : 'Guardar contacto'; revisarDuplicados(); }
+});
+
+$('#fBorrar').addEventListener('click', async () => {
+  const b = $('#fBorrar');
+  if (!b.dataset.confirmar) { b.dataset.confirmar = '1'; b.textContent = 'Confirmar: borrar contacto'; return; }
+  b.disabled = true;
+  try {
+    const r = await escribir({ accion: 'borrar', id: editando.ID });
+    if (!r.ok) throw new Error(r.mensaje);
+    S.contactos = S.contactos.filter(c => c.ID !== editando.ID);
+    guardarCache(); $('#dContacto').close(); render(); toast('Contacto borrado');
+  } catch (ex) { if (ex.message !== 'cancelado') { $('#fErr').textContent = ex.message; $('#fErr').hidden = false; } }
+  finally { b.disabled = false; }
+});
+
+function guardarCache() {
+  const c = LS.get('cache', {}) || {};
+  LS.set('cache', Object.assign(c, { contactos: S.contactos.map(x => { const o = {}; Object.keys(x).forEach(k => { if (k[0] !== '_') o[k] = x[k]; }); return o; }), categorias: S.categorias, difusiones: S.difusiones }));
+}
+
+/* ---------- importar ---------- */
+const ALIAS = {
+  Nombre: ['nombre', 'institucion', 'medio', 'entidad', 'organizacion', 'cuenta', 'razon social'],
+  Detalle: ['detalle', 'seccion', 'facultad', 'cargo', 'area', 'perfiles del concurso', 'perfiles'],
+  Persona: ['persona', 'persona de contacto', 'contacto', 'referente'],
+  Mail: ['mail', 'correo', 'email', 'e mail', 'mails'],
+  Instagram: ['instagram', 'ig', 'usuario', 'cuenta de instagram'],
+  WhatsApp: ['whatsapp', 'celular', 'whatsapp del contacto', 'wa'],
+  'Teléfono': ['telefono', 'tel'],
+  Zona: ['zona', 'ciudad', 'localidad', 'partido', 'departamento judicial'],
+  Notas: ['notas', 'observaciones', 'comentarios'],
+  'Categoría': ['categoria', 'tipo']
+};
+function parsearLista(txt) {
+  const lineas = txt.split(/\r?\n/).filter(l => l.trim());
+  if (!lineas.length) return [];
+  const sep = lineas[0].includes('\t') ? '\t' : (lineas[0].split(';').length > 2 ? ';' : null);
+  if (sep) {
+    const head = lineas[0].split(sep).map(h => normK(h));
+    const mapa = head.map(h => Object.keys(ALIAS).find(k => ALIAS[k].includes(h)) || null);
+    if (mapa.some(Boolean)) {
+      return lineas.slice(1).map(l => {
+        const o = {}; l.split(sep).forEach((v, i) => { if (mapa[i]) o[mapa[i]] = [o[mapa[i]], v.trim()].filter(Boolean).join(', '); });
+        if (!o.Nombre) o.Nombre = o.Instagram ? '@' + (igsDe(o.Instagram)[0] || o.Instagram) : (mailsDe(o.Mail)[0] || '');
+        return o;
+      }).filter(o => o.Nombre);
+    }
+  }
+  // Línea libre: detecta mails, @usuarios y teléfonos; el resto es el nombre
+  return lineas.map(l => {
+    const mails = mailsDe(l);
+    let resto = l.replace(/[^\s,;]+@[^\s,;]+/g, ' ');
+    const igs = [];
+    resto = resto.replace(/(https?:\/\/)?(www\.)?instagram\.com\/[A-Za-z0-9._]+\/?|@[A-Za-z0-9._]{2,30}/g, m => { igs.push(...igsDe(m)); return ' '; });
+    const tels = [];
+    resto = resto.replace(/\+?\d[\d\s-]{7,}\d/g, m => { tels.push(m.trim()); return ' '; });
+    resto = resto.replace(/[,;|\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!resto && !mails.length && !tels.length && /^[A-Za-z0-9._]{2,30}$/.test(l.trim())) igs.push(l.trim().toLowerCase());
+    const nombre = resto || (igs[0] ? '@' + igs[0] : mails[0] || tels[0] || '');
+    return { Nombre: nombre, Mail: mails.join(', '), Instagram: igs.join(', '), WhatsApp: tels.join(', ') };
+  }).filter(o => o.Nombre);
+}
+function previsualizar() {
+  const filas = parsearLista($('#iTexto').value);
+  const vistos = { m: new Set(), i: new Set(), w: new Set(), n: new Set() };
+  const nuevos = [], repetidos = [];
+  filas.forEach(o => {
+    const dups = duplicadosDe(o);
+    const k = { m: mailsDe(o.Mail), i: igsDe(o.Instagram), w: lista(o.WhatsApp).map(telClave).filter(Boolean), n: [normK(o.Nombre + ' ' + (o.Detalle || ''))] };
+    const enLote = Object.keys(k).some(t => k[t].some(v => vistos[t].has(v)));
+    const hit = Object.values(dups)[0];
+    if (hit || enLote) repetidos.push({ o, hit });
+    else { nuevos.push(o); Object.keys(k).forEach(t => k[t].forEach(v => vistos[t].add(v))); }
+  });
+  const box = $('#iPrev');
+  if (!filas.length) { box.innerHTML = ''; $('#iBtn').disabled = true; $('#iBtn').textContent = 'Importar'; return { nuevos }; }
+  box.innerHTML = `<p class="msg ok">${nuevos.length} contactos nuevos para agregar${repetidos.length ? ` · ${repetidos.length} ya estaban y se omiten` : ''}.</p>` +
+    (repetidos.length ? `<ul class="lista-res">${repetidos.map(r => `<li>${esc(r.o.Nombre)} → ${r.hit ? 'ya existe como <b>' + esc(r.hit.Nombre) + '</b>' : 'repetido en la lista pegada'}</li>`).join('')}</ul>` : '');
+  $('#iBtn').disabled = !nuevos.length || !$('#iCat').value;
+  $('#iBtn').textContent = nuevos.length ? `Importar ${nuevos.length}` : 'Importar';
+  return { nuevos };
+}
+function abrirImportar() {
+  $('#iTexto').value = ''; $('#iPrev').innerHTML = '';
+  opcionesCategorias($('#iCat'), S.cat || '', false);
+  $('#iDif').innerHTML = '<option value="">Ninguna</option>' + S.difusiones.filter(d => d.estado !== 'Archivada').map(d => `<option${d.nombre === S.dif ? ' selected' : ''}>${esc(d.nombre)}</option>`).join('');
+  previsualizar(); abrir($('#dImportar')); setTimeout(() => $('#iTexto').focus(), 30);
+}
+$('#iTexto').addEventListener('input', previsualizar);
+$('#iCat').addEventListener('change', previsualizar);
+$('#fImportar').addEventListener('submit', async e => {
+  e.preventDefault();
+  const { nuevos } = previsualizar(); if (!nuevos.length) return;
+  const btn = $('#iBtn'); btn.disabled = true; btn.textContent = 'Importando…';
+  try {
+    const r = await escribir({ accion: 'importar', contactos: nuevos, categoria: $('#iCat').value, difusion: $('#iDif').value });
+    if (!r.ok) throw new Error(r.mensaje);
+    r.agregados.forEach(c => S.contactos.push(preparar(c)));
+    guardarCache(); render();
+    $('#iPrev').innerHTML = `<p class="msg ok">Listo: ${r.agregados.length} agregados${r.omitidos.length ? `, ${r.omitidos.length} omitidos` : ''}.</p>` +
+      (r.omitidos.length ? `<ul class="lista-res">${r.omitidos.map(o => `<li>${esc(o.nombre)}: ${esc(o.motivo)}${o.existente ? ' (' + esc(o.existente) + ')' : ''}</li>`).join('')}</ul>` : '');
+    $('#iTexto').value = ''; btn.textContent = 'Importar';
+    toast(r.agregados.length + ' contactos importados');
+  } catch (ex) { if (ex.message !== 'cancelado') $('#iPrev').innerHTML = `<p class="msg error">${esc(ex.message)}</p>`; btn.disabled = false; btn.textContent = 'Importar'; }
+});
+
+/* ---------- sumar / quitar de difusión ---------- */
+let modoSumar = 'sumar';
+function abrirSumar(modo) {
+  modoSumar = modo;
+  const n = S._vis.vis.length;
+  if (!n) { toast('No hay contactos visibles', true); return; }
+  $('#sErr').hidden = true;
+  if (modo === 'quitar') {
+    $('#dsTit').textContent = 'Quitar de la difusión';
+    $('#sTxt').innerHTML = `Se quitan los <b>${n}</b> contactos visibles de <b>${esc(S.dif)}</b>. No se borran de la agenda.`;
+    $('#sDif').innerHTML = `<option>${esc(S.dif)}</option>`; $('#sDif').disabled = true;
+    $('#sBtn').textContent = 'Quitar ' + n; $('#sNuevaBox').hidden = true;
+  } else {
+    $('#dsTit').textContent = 'Sumar a una difusión'; $('#sDif').disabled = false;
+    $('#sTxt').innerHTML = `Se suman los <b>${n}</b> contactos visibles (según la búsqueda y la categoría elegidas).`;
+    $('#sDif').innerHTML = S.difusiones.filter(d => d.estado !== 'Archivada').map(d => `<option>${esc(d.nombre)}</option>`).join('') + '<option value="__nueva">+ Difusión nueva…</option>';
+    $('#sNuevaBox').hidden = $('#sDif').value !== '__nueva';
+    $('#sBtn').textContent = 'Sumar ' + n;
+  }
+  abrir($('#dSumar'));
+}
+$('#sDif').addEventListener('change', () => { $('#sNuevaBox').hidden = $('#sDif').value !== '__nueva'; if (!$('#sNuevaBox').hidden) $('#sNueva').focus(); });
+$('#fSumar').addEventListener('submit', async e => {
+  e.preventDefault();
+  const dif = $('#sDif').value === '__nueva' ? $('#sNueva').value.trim() : $('#sDif').value;
+  if (!dif) { $('#sErr').textContent = 'Escribí el nombre de la difusión.'; $('#sErr').hidden = false; return; }
+  const ids = S._vis.vis.map(c => c.ID), quitar = modoSumar === 'quitar';
+  const btn = $('#sBtn'); btn.disabled = true;
+  try {
+    const r = await escribir({ accion: 'difusionSumar', ids, difusion: dif, quitar });
+    if (!r.ok) throw new Error(r.mensaje);
+    S.contactos.forEach(c => {
+      if (!ids.includes(c.ID)) return;
+      const l = c._difs.filter(x => x !== dif); if (!quitar) l.push(dif);
+      c.Difusiones = l.join(', '); preparar(c);
+    });
+    if (!S.difusiones.some(d => d.nombre === dif)) S.difusiones.push({ nombre: dif, estado: 'Activa' });
+    guardarCache(); $('#dSumar').close();
+    if (!quitar) { S.dif = dif; S.cat = ''; S.q = ''; $('#q').value = ''; sincronizarURL(); }
+    render(); toast(quitar ? `${r.cambios} contactos quitados` : `${r.cambios} contactos sumados a ${dif}`);
+  } catch (ex) { if (ex.message !== 'cancelado') { $('#sErr').textContent = ex.message; $('#sErr').hidden = false; } }
+  finally { btn.disabled = false; }
+});
+
+/* ---------- gestionar difusiones ---------- */
+function abrirDifusiones() {
+  $('#ddErr').hidden = true; $('#ddNueva').value = '';
+  $('#ddLista').innerHTML = S.difusiones.length ? S.difusiones.map(d => {
+    const n = S.contactos.filter(c => c._difs.includes(d.nombre)).length;
+    return `<div class="dif-fila" data-nombre="${esc(d.nombre)}"><input value="${esc(d.nombre)}" aria-label="Nombre de la difusión"><span class="etq">${n === 1 ? '1 contacto' : n + ' contactos'}</span>
+      <button class="btn" type="button" data-renombrar>Guardar nombre</button>
+      <button class="btn" type="button" data-estado="${d.estado === 'Archivada' ? 'Activa' : 'Archivada'}">${d.estado === 'Archivada' ? 'Reactivar' : 'Archivar'}</button></div>`;
+  }).join('') : '<p class="ayuda">Todavía no hay difusiones.</p>';
+  abrir($('#dDifs'));
+}
+async function guardarDifusion(d) {
+  try {
+    const r = await escribir(Object.assign({ accion: 'difusionGuardar' }, { difusion: d }));
+    if (!r.ok) throw new Error(r.mensaje);
+    if (d.anterior && d.anterior !== d.nombre) S.contactos.forEach(c => { if (c._difs.includes(d.anterior)) { c.Difusiones = c._difs.map(x => x === d.anterior ? d.nombre : x).join(', '); preparar(c); } });
+    if (S.dif === d.anterior) S.dif = d.nombre;
+    S.difusiones = r.difusiones; guardarCache(); render(); abrirDifusiones(); toast('Difusión guardada');
+  } catch (ex) { if (ex.message !== 'cancelado') { $('#ddErr').textContent = ex.message; $('#ddErr').hidden = false; } }
+}
+$('#ddLista').addEventListener('click', e => {
+  const fila = e.target.closest('.dif-fila'); if (!fila) return;
+  const ant = fila.dataset.nombre, d = S.difusiones.find(x => x.nombre === ant);
+  if (e.target.closest('[data-renombrar]')) guardarDifusion({ anterior: ant, nombre: fila.querySelector('input').value.trim(), estado: d.estado });
+  const est = e.target.closest('[data-estado]'); if (est) guardarDifusion({ anterior: ant, nombre: ant, estado: est.dataset.estado });
+});
+$('#fDifsGestion').addEventListener('submit', e => {
+  e.preventDefault(); const n = $('#ddNueva').value.trim(); if (!n) return;
+  if (S.difusiones.some(d => normK(d.nombre) === normK(n))) { $('#ddErr').textContent = 'Ya existe una difusión con ese nombre.'; $('#ddErr').hidden = false; return; }
+  guardarDifusion({ nombre: n, estado: 'Activa' });
+});
+
+/* ---------- CSV ---------- */
+function descargarCSV() {
+  const cols = ['Categoría', 'Nombre', 'Detalle', 'Persona', 'Mail', 'Instagram', 'WhatsApp', 'Teléfono', 'Zona', 'Difusiones', 'Notas'];
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const filas = [cols.join(',')].concat(S._vis.vis.map(c => cols.map(k => q(k === 'Instagram' ? c._igs.map(h => '@' + h).join(', ') : c[k])).join(',')));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'difusion-' + (S.dif || 'contactos').toLowerCase().replace(/[^a-z0-9]+/gi, '-') + '.csv';
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------- URL y eventos ---------- */
+function sincronizarURL() {
+  const u = new URLSearchParams();
+  if (S.dif) u.set('d', S.dif); if (S.cat) u.set('c', S.cat); if (S.q) u.set('q', S.q);
+  history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : ''));
+  LS.set('ultima', { dif: S.dif });
+}
+let tBusq;
+$('#q').addEventListener('input', () => {
+  S.q = $('#q').value; $('#buscarBox').classList.toggle('lleno', !!S.q);
+  clearTimeout(tBusq); tBusq = setTimeout(() => { render(); sincronizarURL(); }, 60);
+});
+$('#limpiar').addEventListener('click', () => { $('#q').value = ''; S.q = ''; $('#buscarBox').classList.remove('lleno'); render(); sincronizarURL(); $('#q').focus(); });
+$('#difs').addEventListener('click', e => { const b = e.target.closest('[data-dif]'); if (!b) return; S.dif = b.dataset.dif; S.cat = ''; S.soloRepetidos = false; render(); sincronizarURL(); });
+$('#cats').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (!b) return; S.cat = b.dataset.cat; render(); sincronizarURL(); });
+$('#avisos').addEventListener('click', e => { const b = e.target.closest('[data-aviso]'); if (!b) return; S.soloRepetidos = b.dataset.aviso === 'repetidos'; if (S.soloRepetidos) { S.dif = ''; S.cat = ''; } render(); });
+$('#cpMails').addEventListener('click', copiarMails);
+$('#cpIG').addEventListener('click', copiarIG);
+$('#cpWA').addEventListener('click', copiarWA);
+$('#progReset').addEventListener('click', () => { S.igTanda = 0; S.copiados.clear(); guardarCopiados(); render(); toast('Marcas reiniciadas'); });
+function setArroba(v) { S.arroba = v; LS.set('arroba', v); $('#conArroba').setAttribute('aria-pressed', v); $('#sinArroba').setAttribute('aria-pressed', !v); render(); }
+$('#conArroba').addEventListener('click', () => setArroba(true));
+$('#sinArroba').addEventListener('click', () => setArroba(false));
+$('#btnAgregar').addEventListener('click', () => abrirContacto(null));
+$('#lista').addEventListener('click', async e => {
+  const cp = e.target.closest('[data-copiar]');
+  if (cp) {
+    if (await copiar(cp.dataset.copiar)) { marcarCopiados([cp.dataset.marca]); cp.parentElement.classList.add('ok'); toast(cp.dataset.tipo + ' copiado'); }
+    else toast('No se pudo copiar. Seleccioná el texto a mano.', true);
+    return;
+  }
+  const ed = e.target.closest('[data-editar]');
+  if (ed) { const c = S.contactos.find(x => x.ID === ed.dataset.editar); if (c) abrirContacto(c); return; }
+  const ir = e.target.closest('[data-ir]');
+  if (ir) {
+    const a = ir.dataset.ir;
+    if (a === 'todos') { S.dif = ''; S.cat = ''; render(); sincronizarURL(); }
+    if (a === 'agregar') abrirContacto(null, { Nombre: S.q.trim() });
+    if (a === 'reintentar') cargar();
+  }
+});
+const menu = $('#menuMas');
+$('#btnMas').addEventListener('click', e => { e.stopPropagation(); const on = !menu.classList.contains('on'); menu.classList.toggle('on', on); $('#btnMas').setAttribute('aria-expanded', on); });
+document.addEventListener('click', e => { if (!e.target.closest('.menu')) { menu.classList.remove('on'); $('#btnMas').setAttribute('aria-expanded', false); } });
+menu.addEventListener('click', e => {
+  const b = e.target.closest('[data-accion]'); if (!b) return;
+  menu.classList.remove('on');
+  ({ importar: abrirImportar, sumar: () => abrirSumar('sumar'), quitar: () => abrirSumar('quitar'), difusiones: abrirDifusiones, csv: descargarCSV,
+     actualizar: () => cargar(false), salir: () => { LS.del('clave'); toast('Clave olvidada en este navegador'); } })[b.dataset.accion]();
+});
+document.addEventListener('keydown', e => {
+  if (document.querySelector('dialog[open]')) return;
+  if (e.key === '/' && document.activeElement !== $('#q')) { e.preventDefault(); $('#q').focus(); $('#q').select(); }
+  if (e.key === 'Escape' && document.activeElement === $('#q')) { $('#limpiar').click(); }
+});
+new IntersectionObserver(([en]) => $('#barra').classList.toggle('sombra', !en.isIntersecting), { threshold: 0 }).observe($('#difs'));
+['#mPlanilla', '#pieFuente'].forEach(s => $(s).addEventListener('click', e => { if (!S.planilla) { e.preventDefault(); toast('La planilla todavía no está conectada', true); } else e.currentTarget.href = S.planilla; }));
+
+/* ---------- inicio ---------- */
+(function inicio() {
+  const u = new URLSearchParams(location.search);
+  S.dif = u.has('d') ? u.get('d') : (LS.get('ultima', {}) || {}).dif || '';
+  S.cat = u.get('c') || '';
+  S.q = u.get('q') || ''; $('#q').value = S.q; $('#buscarBox').classList.toggle('lleno', !!S.q);
+  S.copiados = new Set(LS.get('copiados', []));
+  $('#conArroba').setAttribute('aria-pressed', S.arroba); $('#sinArroba').setAttribute('aria-pressed', !S.arroba);
+  if (matchMedia('(pointer:fine)').matches) $('#q').focus();
+  cargar();
+})();
+</script>
+</body>
+</html>
