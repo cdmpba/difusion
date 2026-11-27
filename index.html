@@ -706,7 +706,6 @@ $('#fContacto').addEventListener('submit', async e => {
   if (!o.Nombre) return mal('Completá el nombre.');
   if (o.Mail && !mailsDe(o.Mail).length) return mal('El mail no parece válido. Revisalo.');
   if (o.Instagram && !igsDe(o.Instagram).length) return mal('El usuario de Instagram no parece válido.');
-  if (!o.Mail && !o.Instagram && !o.WhatsApp && !o['Teléfono'] && !o.Persona) return mal('Cargá al menos un dato de contacto: mail, Instagram, WhatsApp o teléfono.');
   if (revisarDuplicados()) return mal('Hay datos que ya pertenecen a otro contacto.');
   const btn = $('#fGuardar'); btn.disabled = true; btn.textContent = 'Guardando…';
   try {
