@@ -231,7 +231,6 @@ footer{color:var(--texto2);font-size:12px;padding:24px 0 32px;border-top:1px sol
           <button role="menuitem" type="button" data-accion="csv">Descargar los visibles (CSV)</button>
           <a role="menuitem" id="mPlanilla" href="#" target="_blank" rel="noopener">Abrir la planilla</a>
           <button role="menuitem" type="button" data-accion="actualizar">Actualizar desde la planilla</button>
-          <button role="menuitem" type="button" data-accion="salir">Olvidar clave en este navegador</button>
         </div>
       </div>
     </div>
@@ -276,19 +275,6 @@ footer{color:var(--texto2);font-size:12px;padding:24px 0 32px;border-top:1px sol
       <button class="btn" type="button" data-cerrar>Cancelar</button>
       <button class="btn peligro" type="button" id="fBorrar" style="margin-left:auto" hidden>Borrar</button>
     </div>
-  </form>
-</dialog>
-
-<!-- Clave -->
-<dialog id="dClave" aria-labelledby="dkTit">
-  <form id="fClave">
-    <div class="m-head"><h2 id="dkTit">Clave</h2><button class="x" type="button" data-cerrar aria-label="Cerrar">×</button></div>
-    <div class="m-body">
-      <p style="margin:0" id="kTxt">Ingresá la clave de carga. Queda guardada en este navegador.</p>
-      <div class="campo"><label for="kInput">Clave</label><input id="kInput" type="password" autocomplete="current-password" required></div>
-      <p class="msg error" id="kErr" hidden></p>
-    </div>
-    <div class="m-foot"><button class="btn prim" type="submit">Continuar</button><button class="btn" type="button" data-cerrar>Cancelar</button></div>
   </form>
 </dialog>
 
@@ -345,7 +331,7 @@ footer{color:var(--texto2);font-size:12px;padding:24px 0 32px;border-top:1px sol
    CONFIGURACIÓN · pegar la URL de la implementación de Apps Script (/exec)
    ===================================================================== */
 const CONFIG = {
-  API: 'PEGAR_URL_APPS_SCRIPT_AQUI',
+  API: 'https://script.google.com/macros/s/AKfycbwX1bq7LFy6tAMuXLh8ikY9o9RT9Ug_WFih8E_zfaZRZi8zlizve8o5NSO6UjkETrA29w/exec',
   PLANILLA: 'https://docs.google.com/spreadsheets/d/1Q-rM3M1RI5FVxEmsVM9x2C6ovYVcBXTUbhxsccVmF4k/edit',
   LIMITE_IG: 20            // menciones por publicación en Instagram
 };
@@ -410,9 +396,12 @@ function preparar(c) {
 /* ---------- datos ---------- */
 async function api(cuerpo) {
   if (!CONFIG.API || CONFIG.API.includes('PEGAR_')) throw new Error('Falta conectar la planilla (URL de Apps Script).');
-  const r = await fetch(CONFIG.API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(cuerpo) });
+  const sinAcceso = 'No se pudo conectar con la planilla. En Apps Script, la implementación tiene que tener acceso "Cualquier persona".';
+  let r;
+  try { r = await fetch(CONFIG.API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(cuerpo) }); }
+  catch (e) { throw new Error(sinAcceso); }
   if (!r.ok) throw new Error('La planilla no respondió (' + r.status + ').');
-  return r.json();
+  try { return await r.json(); } catch (e) { throw new Error(sinAcceso); }
 }
 
 function aplicarDatos(d) {
@@ -426,8 +415,7 @@ async function cargar(silencioso) {
   const cache = LS.get('cache', null);
   if (cache && !S.contactos.length) { aplicarDatos(cache); render(); estado('Copia local · actualizando…'); }
   try {
-    const d = await api({ accion: 'datos', clave: LS.get('clave', '') });
-    if (!d.ok && d.error === 'clave') { await pedirClave('Esta agenda está protegida. Ingresá la clave de acceso del equipo.'); return cargar(silencioso); }
+    const d = await api({ accion: 'datos' });
     if (!d.ok) throw new Error(d.mensaje || 'Error al leer la planilla.');
     aplicarDatos(d);
     LS.set('cache', { contactos: d.contactos, categorias: d.categorias, difusiones: d.difusiones, planilla: d.planilla, fecha: d.actualizado });
@@ -631,34 +619,8 @@ async function copiarWA() {
   if (await copiar(w.join('\n'))) { marcarCopiados(w.map(x => 'wa:' + x)); render(); toast(w.length + ' números copiados'); }
 }
 
-/* ---------- clave ---------- */
-function pedirClave(texto) {
-  return new Promise((ok, no) => {
-    const d = $('#dClave');
-    $('#kTxt').textContent = texto || 'Ingresá la clave de carga. Queda guardada en este navegador.';
-    $('#kErr').hidden = true; $('#kInput').value = '';
-    d._resolver = ok; d._rechazar = no;
-    abrir(d); setTimeout(() => $('#kInput').focus(), 30);
-  });
-}
-$('#fClave').addEventListener('submit', e => {
-  e.preventDefault();
-  const v = $('#kInput').value.trim(); if (!v) return;
-  LS.set('clave', v); const d = $('#dClave'); d._rechazar = null; d.close(); d._resolver && d._resolver(v);
-});
-$('#dClave').addEventListener('close', () => { const d = $('#dClave'); if (d._rechazar) { d._rechazar(new Error('cancelado')); d._rechazar = null; } });
-
-/** Ejecuta una escritura; si la clave falta o es incorrecta, la pide y reintenta. */
-async function escribir(cuerpo) {
-  if (!LS.get('clave', '')) await pedirClave();
-  for (let i = 0; i < 3; i++) {
-    const r = await api(Object.assign({}, cuerpo, { clave: LS.get('clave', '') }));
-    if (r.ok || r.error !== 'clave') return r;
-    LS.del('clave');
-    await pedirClave('La clave no es correcta. Probá de nuevo.');
-  }
-  throw new Error('Clave incorrecta.');
-}
+/* ---------- escritura ---------- */
+async function escribir(cuerpo) { return api(cuerpo); }
 
 /* ---------- modales ---------- */
 function abrir(d) { if (!d.open) d.showModal(); }
@@ -1003,7 +965,7 @@ menu.addEventListener('click', e => {
   const b = e.target.closest('[data-accion]'); if (!b) return;
   menu.classList.remove('on');
   ({ importar: abrirImportar, sumar: () => abrirSumar('sumar'), quitar: () => abrirSumar('quitar'), difusiones: abrirDifusiones, csv: descargarCSV,
-     actualizar: () => cargar(false), salir: () => { LS.del('clave'); toast('Clave olvidada en este navegador'); } })[b.dataset.accion]();
+     actualizar: () => cargar(false) })[b.dataset.accion]();
 });
 document.addEventListener('keydown', e => {
   if (document.querySelector('dialog[open]')) return;
