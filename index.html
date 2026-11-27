@@ -118,6 +118,8 @@ mark{background:#FFF0A8;color:inherit;border-radius:3px;padding:0 1px}
 .dato.ok svg{color:var(--azul2)}
 .dato a{display:flex;align-items:center;padding:0 9px;border-left:1px solid var(--borde);color:var(--texto2)}
 .dato a:hover{color:var(--ok);background:#fff}
+.dato a.ver{gap:5px;padding:0 10px;font-size:13px;font-weight:500;color:var(--enlace);text-decoration:none;white-space:nowrap}
+.dato a.ver:hover{background:#fff;color:var(--azul);text-decoration:underline}
 .nota{font-size:13px;color:var(--texto2);margin:0;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .vacio{background:#fff;border:1px dashed var(--borde2);border-radius:16px;padding:28px 20px;text-align:center;margin-top:20px}
 .vacio p{margin:0 0 12px}
@@ -235,7 +237,8 @@ footer{color:var(--texto2);font-size:12px;padding:24px 0 32px;border-top:1px sol
       </div>
     </div>
   </div>
-  <div class="prog" id="prog"><span id="progTxt"></span><span class="bar"><i id="progBar"></i></span><button type="button" id="progReset">Reiniciar</button></div>
+  <div class="prog" id="progMail"><span class="ptxt"></span><span class="bar"><i></i></span><button type="button" data-reiniciar="mail">Reiniciar</button></div>
+  <div class="prog" id="progIG"><span class="ptxt"></span><span class="bar"><i></i></span><button type="button" data-reiniciar="ig">Reiniciar</button></div>
   <div id="lista"><p class="cargando">Cargando contactos…</p></div>
   <footer>Difusión · Comunicación Digital MPBA · v1.0 · Datos: <a id="pieFuente" href="#" target="_blank" rel="noopener">planilla de contactos</a> · Atajos: <b>/</b> buscar, <b>Esc</b> limpiar</footer>
 </main>
@@ -333,7 +336,8 @@ footer{color:var(--texto2);font-size:12px;padding:24px 0 32px;border-top:1px sol
 const CONFIG = {
   API: 'https://script.google.com/macros/s/AKfycbwX1bq7LFy6tAMuXLh8ikY9o9RT9Ug_WFih8E_zfaZRZi8zlizve8o5NSO6UjkETrA29w/exec',
   PLANILLA: 'https://docs.google.com/spreadsheets/d/10cFWoCaIQc0sjJzOOl_B3ofAMEPF-f_92rz5syiRdcw/edit',
-  LIMITE_IG: 20            // menciones por publicación en Instagram
+  LIMITE_IG: 20,           // menciones por publicación en Instagram
+  LIMITE_MAIL: 15          // correos por envío
 };
 
 /* ---------- utilidades ---------- */
@@ -377,7 +381,7 @@ const ICON = {
 const S = {
   contactos: [], categorias: [], difusiones: [], planilla: CONFIG.PLANILLA,
   dif: '', cat: '', q: '', arroba: LS.get('arroba', true),
-  igTanda: 0, igFirma: '', copiados: new Set(), soloRepetidos: false
+  tanda: { mail: 0, ig: 0 }, firma: '', copiados: new Set(), soloRepetidos: false
 };
 
 function preparar(c) {
@@ -514,7 +518,7 @@ function tarjeta(c, marcar) {
   const meta = [c.Detalle, c.Zona].filter(Boolean).join(' · ');
   const datos = [];
   c._mails.forEach(m => datos.push(dato('mail', m, m, 'Mail')));
-  c._igs.forEach(h => datos.push(dato('ig', (S.arroba ? '@' : '') + h, '@' + h, 'Instagram', h)));
+  c._igs.forEach(h => datos.push(dato('ig', (S.arroba ? '@' : '') + h, '@' + h, 'Instagram', h, 'https://www.instagram.com/' + h + '/')));
   c._was.forEach(w => {
     const k = telClave(w);
     datos.push(dato('wa', w, w, 'WhatsApp', null, k ? 'https://wa.me/549' + k : ''));
@@ -531,32 +535,36 @@ function tarjeta(c, marcar) {
 
 function dato(tipo, copia, texto, nombre, igHandle, enlace) {
   const ok = S.copiados.has(tipo + ':' + texto);
-  return `<span class="dato${ok ? ' ok' : ''}"><button type="button" data-copiar="${esc(copia)}" data-tipo="${nombre}" data-marca="${esc(tipo + ':' + texto)}" title="Copiar ${nombre.toLowerCase()}">${ICON[tipo]}<span>${esc(texto)}</span></button>${enlace ? `<a href="${esc(enlace)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${ICON.abrir}</a>` : ''}</span>`;
+  return `<span class="dato${ok ? ' ok' : ''}"><button type="button" data-copiar="${esc(copia)}" data-tipo="${nombre}" data-marca="${esc(tipo + ':' + texto)}" title="Copiar ${nombre.toLowerCase()}">${ICON[tipo]}<span>${esc(texto)}</span></button>${!enlace ? '' : tipo === 'ig'
+    ? `<a class="ver" href="${esc(enlace)}" target="_blank" rel="noopener" aria-label="Ver el perfil de ${esc(texto)} en Instagram">${ICON.abrir}Ver perfil</a>`
+    : `<a href="${esc(enlace)}" target="_blank" rel="noopener" aria-label="Abrir chat de WhatsApp" title="Abrir WhatsApp">${ICON.abrir}</a>`}</span>`;
 }
 
 function renderAcciones(vis) {
   const mails = [...new Set(vis.flatMap(c => c._mails))];
   const igs = [...new Set(vis.flatMap(c => c._igs))];
   const was = [...new Set(vis.flatMap(c => c._was))];
-  $('#cpMails').innerHTML = ICON.copiar + 'Mails (' + mails.length + ')';
-  $('#cpMails').disabled = !mails.length;
   $('#cpWA').innerHTML = ICON.copiar + 'WhatsApp (' + was.length + ')';
   $('#cpWA').disabled = !was.length;
-  // Instagram en tandas de 20
-  const firma = S.dif + '|' + S.cat + '|' + S.q + '|' + igs.length;
-  if (firma !== S.igFirma) { S.igFirma = firma; S.igTanda = 0; }
-  const L = CONFIG.LIMITE_IG, total = igs.length, desde = S.igTanda * L;
-  const btn = $('#cpIG');
-  btn.disabled = !total;
-  btn.classList.toggle('hecho', total > 0 && desde >= total);
-  if (total <= L) btn.innerHTML = ICON.copiar + 'Instagram (' + total + ')';
-  else if (desde >= total) btn.innerHTML = '✓ Copiadas las ' + total;
-  else btn.innerHTML = ICON.copiar + 'Instagram ' + (desde + 1) + '–' + Math.min(desde + L, total) + ' de ' + total;
-  $('#prog').classList.toggle('on', total > L && S.igTanda > 0);
-  $('#progTxt').textContent = 'Instagram: ' + Math.min(desde, total) + ' de ' + total + ' copiadas';
-  $('#progBar').style.width = (total ? Math.min(desde, total) / total * 100 : 0) + '%';
+  // Mails de a 15 e Instagram de a 20: cada toque copia la tanda siguiente
+  const firma = S.dif + '|' + S.cat + '|' + S.q + '|' + mails.length + '|' + igs.length;
+  if (firma !== S.firma) { S.firma = firma; S.tanda = { mail: 0, ig: 0 }; }
+  botonTanda('mail', $('#cpMails'), $('#progMail'), mails.length, CONFIG.LIMITE_MAIL, 'Mails', 'copiados', 'los');
+  botonTanda('ig', $('#cpIG'), $('#progIG'), igs.length, CONFIG.LIMITE_IG, 'Instagram', 'copiadas', 'las');
   S._vis = { vis, mails, igs, was };
   $('#mQuitar').hidden = !S.dif;
+}
+
+function botonTanda(tipo, btn, prog, total, L, etq, copiadas, art) {
+  const desde = S.tanda[tipo] * L;
+  btn.disabled = !total;
+  btn.classList.toggle('hecho', total > 0 && desde >= total);
+  if (total <= L) btn.innerHTML = ICON.copiar + etq + ' (' + total + ')';
+  else if (desde >= total) btn.innerHTML = '✓ ' + etq + ': ' + copiadas + ' ' + art + ' ' + total;
+  else btn.innerHTML = ICON.copiar + etq + ' ' + (desde + 1) + '–' + Math.min(desde + L, total) + ' de ' + total;
+  prog.classList.toggle('on', total > L && S.tanda[tipo] > 0);
+  prog.querySelector('.ptxt').textContent = etq + ': ' + Math.min(desde, total) + ' de ' + total + ' ' + copiadas;
+  prog.querySelector('i').style.width = (total ? Math.min(desde, total) / total * 100 : 0) + '%';
 }
 
 function renderVacio() {
@@ -595,24 +603,25 @@ function toast(msg, err) {
 function marcarCopiados(claves) { claves.forEach(k => S.copiados.add(k)); guardarCopiados(); }
 function guardarCopiados() { LS.set('copiados', [...S.copiados].slice(-2000)); }
 
-async function copiarMails() {
-  const m = S._vis.mails; if (!m.length) return;
-  if (await copiar(m.join(', '))) { marcarCopiados(m.map(x => 'mail:' + x)); render(); toast(m.length + (m.length === 1 ? ' mail copiado' : ' mails copiados') + ' · listos para pegar en CCO'); }
-}
-async function copiarIG() {
-  const igs = S._vis.igs, L = CONFIG.LIMITE_IG;
-  if (!igs.length) return;
-  let desde = S.igTanda * L;
-  if (desde >= igs.length) { S.igTanda = 0; desde = 0; }
-  const tanda = igs.slice(desde, desde + L);
-  const txt = tanda.map(h => (S.arroba ? '@' : '') + h).join(S.arroba ? ' ' : '\n');
-  if (await copiar(txt)) {
-    marcarCopiados(tanda.map(h => 'ig:@' + h));
-    S.igTanda++;
-    render();
-    const fin = desde + tanda.length;
-    toast(igs.length > L ? `Cuentas ${desde + 1}–${fin} copiadas${fin < igs.length ? ' · tocá de nuevo para las siguientes' : ''}` : tanda.length + (tanda.length === 1 ? ' cuenta copiada' : ' cuentas copiadas'));
-  }
+/** Copia la tanda siguiente (mails de a 15, Instagram de a 20). */
+async function copiarTanda(tipo) {
+  const lista = tipo === 'mail' ? S._vis.mails : S._vis.igs;
+  const L = tipo === 'mail' ? CONFIG.LIMITE_MAIL : CONFIG.LIMITE_IG;
+  if (!lista.length) return;
+  let desde = S.tanda[tipo] * L;
+  if (desde >= lista.length) { S.tanda[tipo] = 0; desde = 0; }
+  const tanda = lista.slice(desde, desde + L);
+  const txt = tipo === 'mail' ? tanda.join(', ') : tanda.map(h => (S.arroba ? '@' : '') + h).join(S.arroba ? ' ' : '\n');
+  if (!(await copiar(txt))) { toast('No se pudo copiar. Probá de nuevo.', true); return; }
+  marcarCopiados(tanda.map(x => tipo === 'mail' ? 'mail:' + x : 'ig:@' + x));
+  S.tanda[tipo]++;
+  render();
+  const fin = desde + tanda.length, m = tipo === 'mail';
+  const cosa = m ? 'Mails' : 'Cuentas', cop = m ? 'copiados' : 'copiadas', sig = m ? 'los siguientes' : 'las siguientes';
+  const extra = tipo === 'mail' ? ' · listos para pegar en CCO' : '';
+  toast(lista.length > L
+    ? `${cosa} ${desde + 1}–${fin} de ${lista.length} ${cop}${fin < lista.length ? ' · tocá de nuevo para ' + sig : ''}`
+    : tanda.length + (tipo === 'mail' ? (tanda.length === 1 ? ' mail copiado' : ' mails copiados') : (tanda.length === 1 ? ' cuenta copiada' : ' cuentas copiadas')) + extra);
 }
 async function copiarWA() {
   const w = S._vis.was; if (!w.length) return;
@@ -932,10 +941,14 @@ $('#limpiar').addEventListener('click', () => { $('#q').value = ''; S.q = ''; $(
 $('#difs').addEventListener('click', e => { const b = e.target.closest('[data-dif]'); if (!b) return; S.dif = b.dataset.dif; S.cat = ''; S.soloRepetidos = false; render(); sincronizarURL(); });
 $('#cats').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (!b) return; S.cat = b.dataset.cat; render(); sincronizarURL(); });
 $('#avisos').addEventListener('click', e => { const b = e.target.closest('[data-aviso]'); if (!b) return; S.soloRepetidos = b.dataset.aviso === 'repetidos'; if (S.soloRepetidos) { S.dif = ''; S.cat = ''; } render(); });
-$('#cpMails').addEventListener('click', copiarMails);
-$('#cpIG').addEventListener('click', copiarIG);
+$('#cpMails').addEventListener('click', () => copiarTanda('mail'));
+$('#cpIG').addEventListener('click', () => copiarTanda('ig'));
 $('#cpWA').addEventListener('click', copiarWA);
-$('#progReset').addEventListener('click', () => { S.igTanda = 0; S.copiados.clear(); guardarCopiados(); render(); toast('Marcas reiniciadas'); });
+document.querySelectorAll('[data-reiniciar]').forEach(b => b.addEventListener('click', () => {
+  const t = b.dataset.reiniciar, pref = t === 'mail' ? 'mail:' : 'ig:';
+  S.tanda[t] = 0; [...S.copiados].forEach(k => { if (k.startsWith(pref)) S.copiados.delete(k); });
+  guardarCopiados(); render(); toast(t === 'mail' ? 'Mails: se vuelve a empezar desde el primero' : 'Instagram: se vuelve a empezar desde la primera');
+}));
 function setArroba(v) { S.arroba = v; LS.set('arroba', v); $('#conArroba').setAttribute('aria-pressed', v); $('#sinArroba').setAttribute('aria-pressed', !v); render(); }
 $('#conArroba').addEventListener('click', () => setArroba(true));
 $('#sinArroba').addEventListener('click', () => setArroba(false));
