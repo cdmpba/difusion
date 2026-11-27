@@ -49,8 +49,11 @@ h2.sec.c{color:var(--azul)}
 .sub{font-size:14px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin:18px 4px 8px;display:flex;justify-content:space-between}
 .sub span{font-weight:400;color:var(--texto2);text-transform:none;letter-spacing:0}
 .resumen{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
-.resumen span{font-size:13px;background:#fff;border:1px solid var(--borde);border-radius:999px;padding:4px 10px;color:var(--texto)}
+.resumen button{min-height:40px;font-size:14px;background:#fff;border:1px solid var(--borde);border-radius:999px;padding:0 14px;color:var(--texto);cursor:pointer}
+.resumen button:hover{border-color:var(--azul2)}
 .resumen b{color:var(--azul)}
+.resumen button[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);color:#fff}
+.resumen button[aria-pressed="true"] b{color:#fff}
 .volver.p b{color:#7A4300}
 
 .volver{display:flex;align-items:center;gap:10px;margin:18px 0 10px}
@@ -214,7 +217,7 @@ function cabecera(g, campo, uno, varios) {
   g.lista.forEach(c => { const n = c[campo].length; if (n) cuenta[c['Categoría']] = (cuenta[c['Categoría']] || 0) + n; });
   const cats = Object.keys(cuenta).sort((a, b) => idxCat(a) - idxCat(b));
   return `<div class="volver${g.dif ? ' p' : ''}"><button type="button" data-volver>← Volver</button><span><span class="etq ${g.dif ? 'p' : 'c'}">${g.dif ? 'Proyecto' : 'Categoría'}</span><br><b>${esc(g.nombre)}</b></span></div>`
-    + (cats.length > 1 ? `<div class="resumen">${cats.map(k => `<span>${esc(k)} <b>${cuenta[k]}</b></span>`).join('')}</div>` : '');
+    + (cats.length > 1 ? `<div class="resumen" role="group" aria-label="Filtrar por categoría"><button type="button" data-subcat="" aria-pressed="${!S.subcat}">Todas <b>${Object.values(cuenta).reduce((a, b) => a + b, 0)}</b></button>${cats.map(k => `<button type="button" data-subcat="${esc(k)}" aria-pressed="${S.subcat === k}">${esc(k)} <b>${cuenta[k]}</b></button>`).join('')}</div>` : '');
 }
 
 /* ---------- vistas ---------- */
@@ -229,7 +232,7 @@ function cuentasVisibles() {
   const q = norm(S.q).replace(/^@/, '');
   let lista = [];
   if (q) { const pal = q.split(/\s+/); lista = S.contactos.filter(c => c._igs.length && pal.every(p => c._busq.includes(p))); }
-  else if (S.grupo) { const g = grupos('_igs').find(x => x.id === S.grupo); lista = g ? g.lista.filter(c => c._igs.length) : []; }
+  else if (S.grupo) { const g = grupos('_igs').find(x => x.id === S.grupo); lista = g ? g.lista.filter(c => c._igs.length && (!S.subcat || c['Categoría'] === S.subcat)) : []; }
   const vistos = new Set(), out = [];
   lista.slice().sort(porCategoria).forEach(c => c._igs.forEach(h => { if (!vistos.has(h)) { vistos.add(h); out.push({ h, c }); } }));
   return out;
@@ -289,7 +292,7 @@ function vistaMails() {
   if (!g) { pintar(gridGrupos('_mails', 'mail', 'mails')); return; }
   // Mails sin repetir, ordenados por categoría (así cada tanda queda agrupada)
   const quien = {};
-  g.lista.slice().sort(porCategoria).forEach(c => c._mails.forEach(m => { if (!quien[m]) quien[m] = c; }));
+  g.lista.filter(c => !S.subcat || c['Categoría'] === S.subcat).sort(porCategoria).forEach(c => c._mails.forEach(m => { if (!quien[m]) quien[m] = c; }));
   const mails = Object.keys(quien);
   const total = Math.ceil(mails.length / POR_TANDA);
   const tandas = [...Array(total).keys()].map(i => mails.slice(i * POR_TANDA, (i + 1) * POR_TANDA));
@@ -346,7 +349,7 @@ function marcarCopiadas(hs) { hs.forEach(h => S.copiadas.add(h)); LS.set('copiad
 
 document.querySelector('.modos').addEventListener('click', e => {
   const b = e.target.closest('[data-modo]'); if (!b) return;
-  S.modo = b.dataset.modo; S.grupo = null; S.q = ''; LS.set('modo', S.modo); render();
+  S.modo = b.dataset.modo; S.grupo = null; S.q = ''; S.subcat = ''; LS.set('modo', S.modo); render();
   if (S.modo === 'ig' && matchMedia('(pointer:fine)').matches) $('#q').focus();
 });
 $('#vista').addEventListener('input', e => { if (e.target.id === 'q') { S.q = e.target.value; render(); } });
@@ -373,8 +376,10 @@ $('#vista').addEventListener('click', async e => {
     return;
   }
   const gr = t.closest('[data-grupo]');
-  if (gr) { S.grupo = gr.dataset.grupo; S.q = ''; render(); window.scrollTo(0, 0); return; }
-  if (t.closest('[data-volver]')) { S.grupo = null; render(); return; }
+  if (gr) { S.grupo = gr.dataset.grupo; S.q = ''; S.subcat = ''; render(); window.scrollTo(0, 0); return; }
+  if (t.closest('[data-volver]')) { S.grupo = null; S.subcat = ''; render(); return; }
+  const sc = t.closest('[data-subcat]');
+  if (sc) { S.subcat = sc.dataset.subcat; S.verTanda = {}; render(); return; }
   const vt = t.closest('[data-ver-tanda]');
   if (vt) { S.verTanda[S._gid] = +vt.dataset.verTanda; render(); return; }
   const ct = t.closest('[data-copiar-tanda]');
